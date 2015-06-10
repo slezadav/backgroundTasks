@@ -1,4 +1,4 @@
-package cz.davo.backgroundtasks;
+package cz.slezadav.backgroundTasks;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -21,8 +21,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import cz.davo.backgroundtasks.BaseTask.ExecutionType;
-import cz.davo.backgroundtasks.BaseTask.IBaseTaskCallbacks;
+import cz.slezadav.backgroundTasks.BaseTask.ExecutionType;
+import cz.slezadav.backgroundTasks.BaseTask.IBaseTaskCallbacks;
+import cz.slezadav.backgroundtasks.BuildConfig;
 
 
 /**

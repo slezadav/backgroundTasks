@@ -1,11 +1,11 @@
-package cz.davo.backgroundtasks;
+package cz.slezadav.backgroundTasks;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import cz.davo.backgroundtasks.BaseTask.ExecutionType;
+import cz.slezadav.backgroundTasks.BaseTask.ExecutionType;
 
 /**
  * Base Activity for handling background tasks Created by david.slezak on 3.3.2015.

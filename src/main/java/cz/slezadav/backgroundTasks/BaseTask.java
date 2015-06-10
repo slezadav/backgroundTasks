@@ -1,4 +1,4 @@
-package cz.davo.backgroundtasks;
+package cz.slezadav.backgroundTasks;
 
 import android.os.AsyncTask;
 
