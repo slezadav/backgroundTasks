@@ -1,4 +1,4 @@
-package cz.slezadav.backgroundTasks;
+package com.github.slezadav.backgroundTasks;
 
 import java.util.ArrayList;
 import java.util.Collections;

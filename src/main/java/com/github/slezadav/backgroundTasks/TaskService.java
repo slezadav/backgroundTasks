@@ -1,4 +1,4 @@
-package cz.slezadav.backgroundTasks;
+package com.github.slezadav.backgroundTasks;
 
 import android.app.Service;
 import android.content.Intent;
