@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
+ * Class containing info about a task, that will run in future
  * Created by david.slezak on 10.6.2015.
  */
 public class FutureTask {

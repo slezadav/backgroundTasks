@@ -26,6 +26,7 @@ import java.util.UUID;
 
 
 /**
+ * A retained fragment managing the task processing
  * Created by david.slezak on 9.6.2015.
  */
 public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult {

@@ -13,6 +13,7 @@ import android.os.Message;
 import java.util.HashMap;
 
 /**
+ * Service to run task with service execution type
  * Created by david.slezak on 20.5.2015.
  */
 public class TaskService extends Service {

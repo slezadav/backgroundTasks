@@ -3,6 +3,7 @@ package com.github.slezadav.backgroundTasks;
 import java.util.ArrayList;
 
 /**
+ * Class containing info about a chain of tasks
  * Created by david.slezak on 9.6.2015.
  */
 public class TaskChain {
