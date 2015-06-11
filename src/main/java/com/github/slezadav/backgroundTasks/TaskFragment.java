@@ -15,15 +15,14 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import com.github.slezadav.backgroundTasks.BaseTask.ExecutionType;
+import com.github.slezadav.backgroundTasks.BaseTask.IBaseTaskCallbacks;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-
-import com.github.slezadav.backgroundTasks.BaseTask.ExecutionType;
-import com.github.slezadav.backgroundTasks.BaseTask.IBaseTaskCallbacks;
-import cz.slezadav.backgroundtasks.BuildConfig;
 
 
 /**
