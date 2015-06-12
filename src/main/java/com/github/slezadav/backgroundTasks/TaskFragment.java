@@ -26,8 +26,7 @@ import java.util.UUID;
 
 
 /**
- * A retained fragment managing the task processing
- * Created by david.slezak on 9.6.2015.
+ * A retained fragment managing the task processing Created by david.slezak on 9.6.2015.
  */
 public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult {
     private HashMap<BaseTask, Object[]> mTasks = new HashMap<>();
@@ -74,6 +73,13 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
     }
 
     protected void startTaskChain(TaskChain chain) {
+        if (isChainInProgress(chain.finalTag)) {
+            if (BuildConfig.DEBUG) {
+                Log.w("TAG", "Another instance of " + chain.finalTag.toString() +
+                             " already in progress");
+            }
+            return;
+        }
         ArrayList<Object> tags = new ArrayList<>();
         for (int i = 0; i < chain.tasks.size() - 1; i++) {
             String chaintag = UUID.randomUUID().toString();
@@ -104,6 +110,7 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
                 return task;
             }
         }
+
         return null;
     }
 
@@ -115,6 +122,16 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
         return getTaskByTag(tag) != null;
     }
 
+    protected boolean isChainInProgress(Object tag) {
+        for (FutureTask ft : mChainedTasks.values()) {
+            if (ft.tag.equals(tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     protected void cancelTask(Object tag) {
         Iterator iterator = mTasks.keySet().iterator();
         while (iterator.hasNext()) {
@@ -125,6 +142,7 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
             }
         }
     }
+
 
     private void startUnfinishedTasks(ExecutionType eType) {
         if (BaseTask.IBaseTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
@@ -162,8 +180,9 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
     }
 
     protected Object removeChainResidue(Object failingTag) {
+        FutureTask ft = null;
         while (mChainedTasks.containsKey(failingTag)) {
-            FutureTask ft = mChainedTasks.get(failingTag);
+            ft = mChainedTasks.get(failingTag);
             mChainedTasks.remove(failingTag);
             failingTag = ft.tag;
         }
@@ -193,8 +212,8 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
 
     private void bindTaskService() {
         if (mTaskService == null) {
-            getActivity().getApplicationContext().bindService(new Intent(getActivity(), TaskService.class), mTaskServiceConnection,
-                    Context.BIND_AUTO_CREATE);
+            getActivity().getApplicationContext().bindService(new Intent(getActivity(), TaskService.class),
+                    mTaskServiceConnection, Context.BIND_AUTO_CREATE);
         }
 
     }
