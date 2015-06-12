@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
@@ -28,10 +29,12 @@ import java.util.UUID;
 /**
  * A retained fragment managing the task processing Created by david.slezak on 9.6.2015.
  */
-public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult {
+public class TaskFragment extends Fragment{
+    protected final static String TASK_FRAGMENT_TAG="com.github.slezadav.backgroundTasks.TaskFragment";
     private HashMap<BaseTask, Object[]> mTasks = new HashMap<>();
     private HashMap<Object, Object> mUnresolvedResults = new HashMap<>();
     private HashMap<Object, FutureTask> mChainedTasks = new HashMap<>();
+
 
 
     private TaskService mTaskService;
@@ -141,6 +144,7 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
                 iterator.remove();
             }
         }
+        //cancelChain(tag);
     }
 
 
@@ -165,7 +169,7 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
             return;
         }
         task.setTag(tag);
-        task.setUnresolvedCallback(this);
+        task.setEnclosingFragment(this);
         boolean serviceReadyOrNotNeeded = task.getExecType() == ExecutionType.ASYNCTASK || mTaskService != null;
         if (getActivity() != null && serviceReadyOrNotNeeded &&
             BaseTask.IBaseTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
@@ -187,6 +191,17 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
             failingTag = ft.tag;
         }
         return failingTag;
+    }
+
+    private Object getChainFinalTag(Object partialTag){
+        Object finalTag=null;
+        FutureTask ft = null;
+        while (mChainedTasks.containsKey(partialTag)) {
+            ft = mChainedTasks.get(partialTag);
+            partialTag = ft.tag;
+            finalTag=partialTag;
+        }
+        return finalTag;
     }
 
 
@@ -240,6 +255,16 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
 
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Activity activity=getActivity();
+        if(IBaseTaskCallbacks.class.isAssignableFrom(activity.getClass())){
+            resolveUnresolvedResults((IBaseTaskCallbacks)activity);
+        }
+
+    }
+
     /**
      * NOT NEEDED as BaseTask holds only WeakReferences Set the callback to null so we don't accidentally leak the
      * Activity instance.
@@ -268,14 +293,13 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
             }
             IBaseTaskCallbacks callbacks = task.getCallbacks();
             if (callbacks != null && !task.isCancelled()) {
-                ((TaskActivity) getActivity()).onPostExecute(tag, result);
+                task.onPostExecute(result);
             } else if (!task.isCancelled()) {
                 mUnresolvedResults.put(tag, result);
             }
         }
     }
 
-    @Override
     public void onUnresolvedResult(Object tag, Object result) {
         mUnresolvedResults.put(tag, result);
     }
@@ -284,10 +308,92 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
         Iterator<Map.Entry<Object, Object>> iterator = mUnresolvedResults.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Object, Object> setElement = iterator.next();
-            callbacks.onPostExecute(setElement.getKey(), setElement.getValue());
+            Object tag=setElement.getKey();
+            Object result=setElement.getValue();
+            handlePostExecute(callbacks, tag, result);
             iterator.remove();
         }
     }
+
+    protected void handlePostExecute(BaseTask.IBaseTaskCallbacks callbacks,Object tag,Object result){
+        if(callbacks != null) {
+            completeTask(tag);
+            if (isTaskChained(tag)) {
+                if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
+                    Log.e("TAG", "Failed chain " + tag + "  " + ((Exception) result).getMessage());
+                    Object failingTag = removeChainResidue(tag);
+                    callbacks.onTaskFail(failingTag, (Exception) result);
+                } else {
+                    Log.d("TAG", "Continuing chain " + tag);
+                    callbacks.onTaskProgressUpdate(getChainFinalTag(tag),result);
+                    continueChain(tag, result);
+                }
+            } else {
+                if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
+                    Log.e("TAG", "Failed task " + tag + "  " + ((Exception) result).getMessage());
+                    callbacks.onTaskFail(tag, (Exception) result);
+                } else {
+                    Log.d("TAG", "Succeeded task " + tag);
+                    callbacks.onTaskSuccess(tag, result);
+                }
+            }
+        }
+
+    }
+
+    protected void handleProgress(BaseTask.IBaseTaskCallbacks callbacks,Object tag,Object... progress){
+        if(callbacks==null){
+            return;
+        }
+        if(isTaskChained(tag)){
+            callbacks.onTaskProgressUpdate(getChainFinalTag(tag), progress);
+        }else{
+            callbacks.onTaskProgressUpdate(tag,progress);
+        }
+    }
+
+    protected void handlePreExecute(BaseTask.IBaseTaskCallbacks callbacks,Object tag){
+        if(callbacks!=null&&!isTaskChained(tag)){
+            callbacks.onTaskReady(tag);
+        }
+    }
+
+    protected void handleCancel(BaseTask.IBaseTaskCallbacks callbacks,Object tag){
+        cancelTask(tag);
+       // cancelChain(tag);
+        if(callbacks!=null){
+            callbacks.onTaskCancelled(tag);
+        }
+    }
+
+//    public void cancelChain(Object finalTag){
+//        for(Map.Entry<Object,FutureTask> ft:mChainedTasks.entrySet()){
+//            FutureTask task= ft.getValue();
+//            if(task.tag.equals(finalTag)){
+//                Log.i("TAG",ft.getKey()+"");
+//               cancelChain(ft.getKey());
+//                return;
+//            }
+//        }
+//            removeChainResidue(finalTag);
+//            //cancelTask(finalTag);
+//
+//
+//    }
+//
+//    private Object findKeyInChains(Object tag){
+//
+//        for(Object t:mChainedTasks.keySet()){
+//            if(mChainedTasks.get(t).tag.equals(tag)){
+//                return t;
+//            }
+//        }
+//        return null;
+//
+//    }
+
+
+
 
 
 }

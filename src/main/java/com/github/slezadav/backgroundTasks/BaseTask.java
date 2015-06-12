@@ -1,6 +1,7 @@
 package com.github.slezadav.backgroundTasks;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -10,7 +11,7 @@ import java.lang.ref.WeakReference;
  */
 public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
     private WeakReference<IBaseTaskCallbacks> mCallbacks;
-    private IUnresolvedResult mUnresolvedCallback;
+    private WeakReference<TaskFragment> mEnclosingFragment;
     private Object mTag;
     private boolean mReady;
     private ExecutionType execType;
@@ -31,9 +32,10 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
         this.mCallbacks=new WeakReference<>(clb);
     }
 
-    public void setUnresolvedCallback(IUnresolvedResult clb){
-        this.mUnresolvedCallback=clb;
+    public void setEnclosingFragment(TaskFragment enclosingFragment){
+        this.mEnclosingFragment=new WeakReference<TaskFragment>(enclosingFragment);
     }
+
 
     public Object getTag() {
         return mTag;
@@ -54,44 +56,45 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
 
     @Override
     protected void onPreExecute() {
-        if(mCallbacks==null){
+        if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
-        if (mCallbacks.get() != null) {
-            mCallbacks.get().onPreExecute(mTag);
+        if (mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
+            mEnclosingFragment.get().handlePreExecute(mCallbacks.get(),getTag());
         }
     }
 
 
     @Override
     protected void onProgressUpdate(Object... progress) {
-        if(mCallbacks==null){
+        if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
-        if (mCallbacks.get() != null) {
-            mCallbacks.get().onProgressUpdate(mTag, progress);
+        if (mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
+            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(), progress);
         }
     }
 
     @Override
     protected void onCancelled() {
-        if(mCallbacks==null){
+        if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
-        if (mCallbacks.get() != null) {
-            mCallbacks.get().onCancelled(mTag);
-        }
+        if(mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
+                mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag());
+            }
+
     }
 
     @Override
     protected void onPostExecute(Object result) {
-        if(mCallbacks==null){
+        if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
-        if (mCallbacks.get() != null&&!isCancelled()) {
-            mCallbacks.get().onPostExecute(mTag, result);
-        }else if(mUnresolvedCallback!=null&&!isCancelled()){
-            mUnresolvedCallback.onUnresolvedResult(mTag,result);
+        if(mEnclosingFragment.get()!=null&&mCallbacks.get() != null&&!isCancelled()) {
+            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(),getTag(),result);
+        }else if(mEnclosingFragment.get()!=null&&!isCancelled()){
+            mEnclosingFragment.get().onUnresolvedResult(mTag,result);
         }
     }
 
@@ -100,13 +103,11 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
     }
 
     public interface IBaseTaskCallbacks {
-        void onPreExecute(Object tag);
-        void onProgressUpdate(Object tag, Object progress);
-        void onCancelled(Object tag);
-        void onPostExecute(Object tag, Object result);
+        void onTaskReady(Object tag);
+        void onTaskProgressUpdate(Object tag, Object progress);
+        void onTaskCancelled(Object tag);
+        void onTaskSuccess(Object tag, Object result);
+        void onTaskFail(Object tag, Exception exception);
     }
 
-    public interface IUnresolvedResult {
-        void onUnresolvedResult(Object tag, Object result);
-    }
 }
