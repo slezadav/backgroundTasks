@@ -193,7 +193,7 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
 
     private void bindTaskService() {
         if (mTaskService == null) {
-            getActivity().bindService(new Intent(getActivity(), TaskService.class), mTaskServiceConnection,
+            getActivity().getApplicationContext().bindService(new Intent(getActivity(), TaskService.class), mTaskServiceConnection,
                     Context.BIND_AUTO_CREATE);
         }
 
@@ -203,9 +203,10 @@ public class TaskFragment extends Fragment implements BaseTask.IUnresolvedResult
     @Override
     public void onDestroy() {
         if (mTaskService != null) {
-            getActivity().unbindService(mTaskServiceConnection);
+            getActivity().getApplicationContext().unbindService(mTaskServiceConnection);
+            getActivity().getApplicationContext().stopService(new Intent(getActivity(), TaskService.class));
         }
-        getActivity().stopService(new Intent(getActivity(), TaskService.class));
+
         super.onDestroy();
     }
 
