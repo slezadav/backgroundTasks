@@ -144,7 +144,7 @@ public class TaskFragment extends Fragment{
                 iterator.remove();
             }
         }
-        //cancelChain(tag);
+        cancelChain(tag);
     }
 
 
@@ -359,38 +359,28 @@ public class TaskFragment extends Fragment{
     }
 
     protected void handleCancel(BaseTask.IBaseTaskCallbacks callbacks,Object tag){
-        cancelTask(tag);
-       // cancelChain(tag);
+        if(isTaskChained(tag)){
+           tag= removeChainResidue(tag);
+        }else{
+            cancelTask(tag);
+        }
         if(callbacks!=null){
             callbacks.onTaskCancelled(tag);
         }
     }
 
-//    public void cancelChain(Object finalTag){
-//        for(Map.Entry<Object,FutureTask> ft:mChainedTasks.entrySet()){
-//            FutureTask task= ft.getValue();
-//            if(task.tag.equals(finalTag)){
-//                Log.i("TAG",ft.getKey()+"");
-//               cancelChain(ft.getKey());
-//                return;
-//            }
-//        }
-//            removeChainResidue(finalTag);
-//            //cancelTask(finalTag);
-//
-//
-//    }
-//
-//    private Object findKeyInChains(Object tag){
-//
-//        for(Object t:mChainedTasks.keySet()){
-//            if(mChainedTasks.get(t).tag.equals(tag)){
-//                return t;
-//            }
-//        }
-//        return null;
-//
-//    }
+    public void cancelChain(Object finalTag){
+        for(Map.Entry<Object,FutureTask> ft:mChainedTasks.entrySet()){
+            FutureTask task= ft.getValue();
+            if(task.tag.equals(finalTag)){
+                if(isTaskInProgress(ft.getKey())){
+                    cancelTask(ft.getKey());
+                }
+                cancelChain(ft.getKey());
+                return;
+            }
+        }
+    }
 
 
 

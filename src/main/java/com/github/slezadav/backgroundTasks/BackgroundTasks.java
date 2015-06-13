@@ -45,12 +45,12 @@ public class BackgroundTasks {
 
 
     private static <T extends FragmentActivity & BaseTask.IBaseTaskCallbacks> TaskFragment  getFragment(T activity){
-        FragmentActivity fragmentActivity= (FragmentActivity) activity;
-        FragmentManager fm = fragmentActivity.getSupportFragmentManager();
+        FragmentManager fm = activity.getSupportFragmentManager();
         TaskFragment fragment =(TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if(fragment==null){
             fragment = new TaskFragment();
             fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commit();
+            fm.executePendingTransactions();
         }
         return fragment;
     }
