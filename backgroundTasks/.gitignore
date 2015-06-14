@@ -31,5 +31,5 @@ proguard/
 /.idea/
 /local.properties
 
-/backgroundTasks/gradle.properties
+gradle.properties
 
