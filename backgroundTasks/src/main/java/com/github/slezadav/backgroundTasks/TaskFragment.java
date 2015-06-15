@@ -8,10 +8,7 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -94,7 +91,7 @@ public class TaskFragment extends Fragment{
                     chain.params.get(i));
             mChainedTasks.put(tags.get(i - 1), ft);
         }
-        startTask(tags.get(0), chain.tasks.get(0));
+        startTask(tags.get(0), chain.tasks.get(0),(Object [])chain.params.get(0));
     }
 
     protected void continueChain(Object finishedTag, Object result) {
@@ -102,7 +99,7 @@ public class TaskFragment extends Fragment{
         if (ft.useHistoryParam) {
             ft.params.add(result);
         }
-        startTask(ft.tag, ft.task, ft.params);
+        startTask(ft.tag, ft.task, (Object[])ft.getParams());
         mChainedTasks.remove(finishedTag);
     }
 

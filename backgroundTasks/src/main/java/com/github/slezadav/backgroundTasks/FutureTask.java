@@ -21,11 +21,7 @@ public class FutureTask {
     }
 
     public Object[] getParams() {
-        Object[] tmp = new Object[params.size()];
-        for (int i = 0; i < params.size(); i++) {
-            tmp[i] = params.get(i);
-        }
-        return tmp;
+        return params.toArray(new Object[params.size()]);
     }
 
 

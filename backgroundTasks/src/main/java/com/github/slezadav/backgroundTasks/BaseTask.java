@@ -1,7 +1,6 @@
 package com.github.slezadav.backgroundTasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -33,7 +32,7 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
     }
 
     public void setEnclosingFragment(TaskFragment enclosingFragment){
-        this.mEnclosingFragment=new WeakReference<TaskFragment>(enclosingFragment);
+        this.mEnclosingFragment=new WeakReference<>(enclosingFragment);
     }
 
 
