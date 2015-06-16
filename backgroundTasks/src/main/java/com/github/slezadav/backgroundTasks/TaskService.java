@@ -5,13 +5,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
-
-import java.util.HashMap;
 
 /**
  * Service to run task with service execution type
@@ -38,11 +33,11 @@ public class TaskService extends Service {
     }
 
     public void executeTask(final BaseTask task, final Object... params) {
-        Log.i("TAG","Executing in service");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    Log.i("TAG", "Executing task");
                     if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
                         task.executeOnExecutor(BaseTask.THREAD_POOL_EXECUTOR, params).get();
                     } else {

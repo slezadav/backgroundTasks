@@ -18,9 +18,15 @@
     <Button android:text="Task Service" android:layout_width="wrap_content"
         android:id="@+id/button_task_service"
         android:layout_height="wrap_content" />
+    <Button android:text="Task ServiceRemote" android:layout_width="wrap_content"
+        android:id="@+id/button_task_service_remote"
+        android:layout_height="wrap_content" />
 
     <Button android:text="Chain Service" android:layout_width="wrap_content"
         android:id="@+id/button_chain_service"
+        android:layout_height="wrap_content" />
+    <Button android:text="Chain ServiceRemote" android:layout_width="wrap_content"
+        android:id="@+id/button_chain_service_remote"
         android:layout_height="wrap_content" />
 
     <Button android:text="Cancel Task" android:layout_width="wrap_content"

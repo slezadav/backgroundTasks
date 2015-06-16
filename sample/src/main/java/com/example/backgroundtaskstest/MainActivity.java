@@ -1,19 +1,14 @@
 package com.example.backgroundtaskstest;
 
-import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.github.slezadav.backgroundTasks.BackgroundTasks;
 import com.github.slezadav.backgroundTasks.BaseTask;
+import com.github.slezadav.backgroundTasks.BaseTask.ExecutionType;
 import com.github.slezadav.backgroundTasks.TaskChain;
 
 
@@ -65,6 +60,13 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
                 BackgroundTasks.startTask(MainActivity.this,TASKTAG,new TestTask(), BaseTask.ExecutionType.SERVICE_LOCAL);
             }
         });
+        Button tasksr= (Button) findViewById(R.id.button_task_service_remote);
+        tasksr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BackgroundTasks.startTask(MainActivity.this,TASKTAG,new TestTask(), ExecutionType.SERVICE_REMOTE);
+            }
+        });
         Button chains= (Button) findViewById(R.id.button_chain_service);
         chains.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +76,17 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
                 chain.addTask(new TestTask());
                 chain.addTask(new TestTask());
                 BackgroundTasks.startTaskChain(MainActivity.this,chain, BaseTask.ExecutionType.SERVICE_LOCAL);
+            }
+        });
+        Button chainsr= (Button) findViewById(R.id.button_chain_service_remote);
+        chainsr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TaskChain chain=new TaskChain(CHAINTAG);
+                chain.addTask(new TestTask());
+                chain.addTask(new TestTask());
+                chain.addTask(new TestTask());
+                BackgroundTasks.startTaskChain(MainActivity.this,chain, ExecutionType.SERVICE_REMOTE);
             }
         });
     }
@@ -86,8 +99,9 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
     }
 
     @Override
-    public void onTaskProgressUpdate(Object tag, Object progress) {
-        Log.i("TAG","onTaskProgress "+tag);
+    public void onTaskProgressUpdate(Object tag, Object... progress) {
+       // Object[] pr= (Object[]) progress[0];
+        Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
     }
 
     @Override
@@ -97,7 +111,7 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
 
     @Override
     public void onTaskSuccess(Object tag, Object result) {
-        Log.i("TAG","onTaskSuccess "+tag);
+        Log.i("TAG","onTaskSuccess "+tag+"   "+result);
     }
 
     @Override

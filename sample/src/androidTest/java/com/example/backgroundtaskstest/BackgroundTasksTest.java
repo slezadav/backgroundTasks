@@ -27,10 +27,14 @@ public class BackgroundTasksTest
         singleAsyncCancel();
         singleAsyncService();
         singleAsyncCancelService();
+        singleAsyncServiceRemote();
+        singleAsyncCancelServiceRemote();
         chainAsync();
         chainAsyncCancel();
         chainAsyncService();
         chainAsyncCancelService();
+        chainAsyncServiceRemote();
+        chainAsyncCancelServiceRemote();
     }
 
 
@@ -131,6 +135,57 @@ public class BackgroundTasksTest
         solo.clickOnButton("Cancel Chain");
         assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel chain",3000));
     }
+
+
+    public void singleAsyncServiceRemote() {
+        Log.d("BackgroundTasksTest", "singleAsyncServiceRemote");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.waitForActivity(MainActivity.class,
+                5000);
+        solo.clickOnButton("Task ServiceRemote");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady task",1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Task did not publish progress",solo.waitForLogMessage("onTaskProgress task",3000));
+        assertTrue("Task did not succeed",solo.waitForLogMessage("onTaskSuccess task",5000));
+    }
+
+    public void chainAsyncServiceRemote() {
+        Log.d("BackgroundTasksTest", "chainAsyncServiceRemote");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Chain ServiceRemote");
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress chain",3000));
+        assertTrue("Chain did not continue",solo.waitForLogMessage("Continuing chain",3000));
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress chain",3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress chain",3000));
+        assertTrue("Chain did not continue",solo.waitForLogMessage("Continuing chain",3000));
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress chain",3000));
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress chain",3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not succeed",solo.waitForLogMessage("onTaskSuccess chain",10000));
+    }
+
+    public void singleAsyncCancelServiceRemote() {
+        Log.d("BackgroundTasksTest", "singleAsyncCancelService");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Task ServiceRemote");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady task",1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Cancel Task");
+        assertTrue("Task did not cancel",solo.waitForLogMessage("onTaskCancel task",3000));
+    }
+
+    public void chainAsyncCancelServiceRemote() {
+        Log.d("BackgroundTasksTest", "chainAsyncCancelService");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Chain ServiceRemote");
+        solo.sleep(1000);
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Cancel Chain");
+        assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel chain",3000));
+    }
+
 
     @Override
     public void tearDown() throws Exception {

@@ -8,7 +8,7 @@ import java.lang.ref.WeakReference;
  * Task class meant to be extended and used with TaskActivity
  * Created by david.slezak on 3.3.2015.
  */
-public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
+public abstract class BaseTask  extends AsyncTask<Object, Object, Object>{
     private WeakReference<IBaseTaskCallbacks> mCallbacks;
     private WeakReference<TaskFragment> mEnclosingFragment;
     private Object mTag;
@@ -55,6 +55,10 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
 
     @Override
     protected void onPreExecute() {
+        if(execType==ExecutionType.SERVICE_REMOTE){
+            mCallbacks.get().onTaskReady(getTag());
+            return;
+        }
         if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
@@ -66,16 +70,24 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
 
     @Override
     protected void onProgressUpdate(Object... progress) {
+        if(execType==ExecutionType.SERVICE_REMOTE){
+            mCallbacks.get().onTaskProgressUpdate(getTag(),(Object[]) progress);
+            return;
+        }
         if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
         if (mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
-            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(), progress);
+            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(),(Object[]) progress);
         }
     }
 
     @Override
     protected void onCancelled() {
+        if(execType==ExecutionType.SERVICE_REMOTE){
+            mCallbacks.get().onTaskCancelled(getTag());
+            return;
+        }
         if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
@@ -87,6 +99,15 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
 
     @Override
     protected void onPostExecute(Object result) {
+        if(execType==ExecutionType.SERVICE_REMOTE){
+            if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
+                mCallbacks.get().onTaskFail(getTag(), (Exception) result);
+            }else{
+                mCallbacks.get().onTaskSuccess(getTag(),result);
+            }
+
+            return;
+        }
         if(mCallbacks==null||mEnclosingFragment==null){
             return;
         }
@@ -98,15 +119,16 @@ public abstract class BaseTask  extends AsyncTask<Object, Object, Object> {
     }
 
     public enum ExecutionType {
-        ASYNCTASK,SERVICE_LOCAL
+        ASYNCTASK,SERVICE_LOCAL,SERVICE_REMOTE
     }
 
     public interface IBaseTaskCallbacks {
         void onTaskReady(Object tag);
-        void onTaskProgressUpdate(Object tag, Object progress);
+        void onTaskProgressUpdate(Object tag, Object... progress);
         void onTaskCancelled(Object tag);
         void onTaskSuccess(Object tag, Object result);
         void onTaskFail(Object tag, Exception exception);
     }
+
 
 }

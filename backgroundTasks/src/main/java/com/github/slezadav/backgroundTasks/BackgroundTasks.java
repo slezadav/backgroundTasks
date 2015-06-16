@@ -1,6 +1,5 @@
 package com.github.slezadav.backgroundTasks;
 
-import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
@@ -22,6 +21,9 @@ public class BackgroundTasks {
     }
 
     public static <T extends FragmentActivity & BaseTask.IBaseTaskCallbacks> void startTaskChain(T activity,TaskChain chain) {
+        if(chain.tasks.isEmpty()){
+            throw new IllegalStateException("Cannot execute empty chain");
+        }
         for (BaseTask task : chain.tasks) {
             task.setExecType(BaseTask.ExecutionType.ASYNCTASK);
         }
@@ -29,6 +31,9 @@ public class BackgroundTasks {
     }
 
     public static <T extends FragmentActivity & BaseTask.IBaseTaskCallbacks> void startTaskChain(T activity,TaskChain chain, BaseTask.ExecutionType eType) {
+        if(chain.tasks.isEmpty()){
+            throw new IllegalStateException("Cannot execute empty chain");
+        }
         for (BaseTask task : chain.tasks) {
             task.setExecType(eType);
         }
