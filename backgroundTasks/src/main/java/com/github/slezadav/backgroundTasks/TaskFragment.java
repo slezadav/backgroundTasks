@@ -5,6 +5,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -68,11 +69,16 @@ public class TaskFragment extends Fragment {
      * @return Fragment which should be used for callbacks
      */
     @Nullable
-    private IBgTaskCallbacks findFragmentById(int id) {
-        for (Fragment fragment : getActivity().getSupportFragmentManager().getFragments()) {
-            if (fragment.getId() == id && IBgTaskCallbacks.class.isAssignableFrom(fragment.getClass())) {
-                return (IBgTaskCallbacks) fragment;
-            }
+    private IBgTaskCallbacks findFragmentByTagOrId(Object id) {
+        FragmentManager fm=getActivity().getSupportFragmentManager();
+        Fragment fragment=null;
+        if(id instanceof String){
+            fragment=fm.findFragmentByTag((String) id);
+        }else if (id instanceof Integer){
+            fragment = fm.findFragmentById((Integer) id);
+        }
+        if(fragment!=null&&IBgTaskCallbacks.class.isAssignableFrom(fragment.getClass())){
+            return (IBgTaskCallbacks) fragment;
         }
         return null;
     }
@@ -148,10 +154,10 @@ public class TaskFragment extends Fragment {
      */
     private void startUnfinishedTasks() {
         for (BaseTask task : mTasks.keySet()) {
-            Integer callbackId = task.getCallbacksId();
+            Object callbackId = task.getCallbacksId();
             IBgTaskCallbacks callbacks = null;
             if (callbackId != null) {
-                callbacks = findFragmentById(callbackId);
+                callbacks = findFragmentByTagOrId(callbackId);
             } else if (getActivity() != null &&
                        IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
                 callbacks = (IBgTaskCallbacks) getActivity();
@@ -178,10 +184,10 @@ public class TaskFragment extends Fragment {
         }
         task.setTag(tag);
         task.setEnclosingFragment(this);
-        Integer callbackId = task.getCallbacksId();
+        Object callbackId = task.getCallbacksId();
         IBgTaskCallbacks callbacks = null;
         if (callbackId != null) {
-            callbacks = findFragmentById(callbackId);
+            callbacks = findFragmentByTagOrId(callbackId);
         } else if (getActivity() != null && IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
             callbacks = (IBgTaskCallbacks) getActivity();
         }
@@ -226,7 +232,7 @@ public class TaskFragment extends Fragment {
             Object result = setElement.getValue();
             IBgTaskCallbacks callbacks = null;
             if (task.getCallbacksId() != null) {
-                callbacks = findFragmentById(task.getCallbacksId());
+                callbacks = findFragmentByTagOrId(task.getCallbacksId());
             } else if (IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
                 callbacks = (IBgTaskCallbacks) getActivity();
             }

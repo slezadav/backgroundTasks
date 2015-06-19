@@ -58,6 +58,7 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
         return mRoot;
     }
 
+
     @Override
     public void onTaskReady(Object tag) {
         Log.i("TAG", "onTaskReady " + tag);

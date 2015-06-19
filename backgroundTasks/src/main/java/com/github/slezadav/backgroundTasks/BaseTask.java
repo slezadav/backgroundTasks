@@ -27,16 +27,16 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     private boolean mReady;
     /**
-     * Id of the fragment used as a callback point, null if callback is an activity
+     *Tag or id of the fragment used as a callback point, null if callback is an activity
      */
-    private Integer mCallbacksId;
+    private Object mCallbacksId;
 
     /**
      * Gets the id of the callback fragment.
      *
      * @return Id of the callback fragment. Null if the callbacks are in activity
      */
-    protected Integer getCallbacksId() {
+    protected Object getCallbacksId() {
         return mCallbacksId;
     }
 
@@ -45,7 +45,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param callbacksId id of the fragment used as a callback target for this task
      */
-    protected void setCallbacksId(Integer callbacksId) {
+    protected void setCallbacksId(Object callbacksId) {
         this.mCallbacksId = callbacksId;
     }
 

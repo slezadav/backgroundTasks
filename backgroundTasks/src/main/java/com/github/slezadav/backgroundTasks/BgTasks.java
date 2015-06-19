@@ -35,7 +35,8 @@ public class BgTasks {
      */
     public static <T extends Fragment & IBgTaskCallbacks> void startTask(T fragment, Object tag, BaseTask task,
                                                                          Object... params) {
-        task.setCallbacksId(fragment.getId());
+        Object id=getIdTagOrIdFromFragment(fragment);
+        task.setCallbacksId(id);
         getFragment(fragment).startTask(tag, task, params);
     }
 
@@ -62,8 +63,9 @@ public class BgTasks {
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
     public static <T extends Fragment & IBgTaskCallbacks> void startTaskChain(T fragment, TaskChain chain) {
+        Object id=getIdTagOrIdFromFragment(fragment);
         for (BaseTask task : chain.tasks) {
-            task.setCallbacksId(fragment.getId());
+            task.setCallbacksId(id);
         }
         if (chain.tasks.isEmpty()) {
             throw new IllegalStateException("Cannot execute empty chain");
@@ -154,4 +156,20 @@ public class BgTasks {
         return fragment;
     }
 
+    /**
+     * Method which gets fragment identifier
+     * @param fragment fragment to be identified
+     * @return tag or id of the fragment
+     */
+    private static Object getIdTagOrIdFromFragment(Fragment fragment){
+        String ftag=fragment.getTag();
+        Integer id=fragment.getId();
+        if(ftag!=null){
+            return ftag;
+        }else if(id!=-1){
+            return id;
+        }else{
+            throw new RuntimeException("Fragment did not specify tag or id");
+        }
+    }
 }
