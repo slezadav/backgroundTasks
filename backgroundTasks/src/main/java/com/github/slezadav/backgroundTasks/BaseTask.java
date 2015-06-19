@@ -5,130 +5,161 @@ import android.os.AsyncTask;
 import java.lang.ref.WeakReference;
 
 /**
- * Task class meant to be extended and used with TaskActivity
+ * Task class meant to be extended and used with TaskFragment. This is a base class for all BackgroundTasks
+ *
  * Created by david.slezak on 3.3.2015.
  */
-public abstract class BaseTask  extends AsyncTask<Object, Object, Object>{
-    private WeakReference<IBaseTaskCallbacks> mCallbacks;
+public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
+    /**
+     * Weak reference to activity or fragment serving as callbacks
+     */
+    private WeakReference<IBgTaskCallbacks> mCallbacks;
+    /**
+     * Weak reference to the TaskFragment which started this task
+     */
     private WeakReference<TaskFragment> mEnclosingFragment;
+    /**
+     * Tag associated with this task
+     */
     private Object mTag;
+    /**
+     * Flag if this task is ready for execution
+     */
     private boolean mReady;
-    private ExecutionType execType;
+    /**
+     * Id of the fragment used as a callback point, null if callback is an activity
+     */
+    private Integer mCallbacksId;
 
-    public IBaseTaskCallbacks getCallbacks(){
-        return mCallbacks.get();
+    /**
+     * Gets the id of the callback fragment.
+     *
+     * @return Id of the callback fragment. Null if the callbacks are in activity
+     */
+    protected Integer getCallbacksId() {
+        return mCallbacksId;
     }
 
-    public ExecutionType getExecType() {
-        return execType;
+    /**
+     * Sets the id of the fragment used as a callback target for this task
+     *
+     * @param callbacksId id of the fragment used as a callback target for this task
+     */
+    protected void setCallbacksId(Integer callbacksId) {
+        this.mCallbacksId = callbacksId;
     }
 
-    public void setExecType(ExecutionType execType) {
-        this.execType = execType;
+    /**
+     * Sets the callbacks for this task
+     *
+     * @param clb Callbacks to be used with this task
+     */
+    protected void setCallbacks(IBgTaskCallbacks clb) {
+        this.mCallbacks = new WeakReference<>(clb);
     }
 
-    public void setCallbacks(IBaseTaskCallbacks clb){
-        this.mCallbacks=new WeakReference<>(clb);
+    /**
+     * Sets the fragment used to run this task
+     *
+     * @param enclosingFragment TaskFragment instance used to start this task
+     */
+    protected void setEnclosingFragment(TaskFragment enclosingFragment) {
+        this.mEnclosingFragment = new WeakReference<>(enclosingFragment);
     }
 
-    public void setEnclosingFragment(TaskFragment enclosingFragment){
-        this.mEnclosingFragment=new WeakReference<>(enclosingFragment);
-    }
-
-
+    /**
+     * Gets this task's tag
+     *
+     * @return this task's tag
+     */
     public Object getTag() {
         return mTag;
     }
 
-    public void setTag(Object mTag) {
-        this.mTag = mTag;
+    /**
+     * Sets this task's tag
+     *
+     * @param tag tag to be used with this task
+     */
+    protected void setTag(Object tag) {
+        this.mTag = tag;
     }
 
-    public boolean isReady() {
+    /**
+     * Flag if this task is ready for execution
+     *
+     * @return true if the task is ready
+     */
+    protected boolean isReady() {
         return mReady;
     }
 
-
-    public void setReady(boolean started) {
-        this.mReady = started;
+    /**
+     * Sets this task ready or not
+     *
+     * @param ready sets this task ready or not
+     */
+    protected void setReady(boolean ready) {
+        this.mReady = ready;
     }
 
     @Override
     protected void onPreExecute() {
-        if(execType==ExecutionType.SERVICE_REMOTE){
-            mCallbacks.get().onTaskReady(getTag());
+        if (!canAskForCallbacks()) {
             return;
         }
-        if(mCallbacks==null||mEnclosingFragment==null){
-            return;
-        }
-        if (mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
-            mEnclosingFragment.get().handlePreExecute(mCallbacks.get(),getTag());
+        if (canUseCallbacks()) {
+            mEnclosingFragment.get().handlePreExecute(mCallbacks.get(), getTag());
         }
     }
 
 
     @Override
     protected void onProgressUpdate(Object... progress) {
-        if(execType==ExecutionType.SERVICE_REMOTE){
-            mCallbacks.get().onTaskProgressUpdate(getTag(),(Object[]) progress);
+        if (!canAskForCallbacks()) {
             return;
         }
-        if(mCallbacks==null||mEnclosingFragment==null){
-            return;
-        }
-        if (mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
-            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(),(Object[]) progress);
+        if (canUseCallbacks()) {
+            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(), (Object[]) progress);
         }
     }
 
     @Override
     protected void onCancelled() {
-        if(execType==ExecutionType.SERVICE_REMOTE){
-            mCallbacks.get().onTaskCancelled(getTag());
+        if (!canAskForCallbacks()) {
             return;
         }
-        if(mCallbacks==null||mEnclosingFragment==null){
-            return;
+        if (canUseCallbacks()) {
+            mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag());
         }
-        if(mCallbacks.get() != null&&mEnclosingFragment.get()!=null) {
-                mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag());
-            }
 
     }
 
     @Override
     protected void onPostExecute(Object result) {
-        if(execType==ExecutionType.SERVICE_REMOTE){
-            if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                mCallbacks.get().onTaskFail(getTag(), (Exception) result);
-            }else{
-                mCallbacks.get().onTaskSuccess(getTag(),result);
-            }
-
+        if (!canAskForCallbacks()) {
             return;
         }
-        if(mCallbacks==null||mEnclosingFragment==null){
-            return;
-        }
-        if(mEnclosingFragment.get()!=null&&mCallbacks.get() != null&&!isCancelled()) {
-            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(),getTag(),result);
-        }else if(mEnclosingFragment.get()!=null&&!isCancelled()){
-            mEnclosingFragment.get().onUnresolvedResult(mTag,result);
+        if (canUseCallbacks() && !isCancelled()) {
+            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(), getTag(), result);
+        } else if (mEnclosingFragment.get() != null && !isCancelled()) {
+            mEnclosingFragment.get().onUnresolvedResult(this, result);
         }
     }
 
-    public enum ExecutionType {
-        ASYNCTASK,SERVICE_LOCAL,SERVICE_REMOTE
+    /**
+     * Finds whether it is possible to find any type of callback
+     * @return true if any callback can be fired
+     */
+    private boolean canAskForCallbacks(){
+        return mCallbacks != null && mEnclosingFragment != null;
     }
 
-    public interface IBaseTaskCallbacks {
-        void onTaskReady(Object tag);
-        void onTaskProgressUpdate(Object tag, Object... progress);
-        void onTaskCancelled(Object tag);
-        void onTaskSuccess(Object tag, Object result);
-        void onTaskFail(Object tag, Exception exception);
+    /**
+     * Finds whether it is possible to fire any type of callback
+     * @return true if any callback can be fired
+     */
+    private boolean canUseCallbacks(){
+        return mCallbacks.get() != null && mEnclosingFragment.get() != null;
     }
-
-
 }

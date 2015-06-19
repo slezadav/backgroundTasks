@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@android:color/holo_green_dark">
+    <Button android:text="Frg Task" android:layout_width="wrap_content"
+        android:id="@+id/button_taskf"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_cancel_taskf"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button android:text="Frg Chain" android:layout_width="wrap_content"
+        android:id="@+id/button_chainf"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_cancel_chainf"
+        android:layout_alignRight="@+id/button_cancel_chainf"
+        android:layout_alignEnd="@+id/button_cancel_chainf" />
+
+
+
+    <Button android:text="Frg Cancel Task" android:layout_width="wrap_content"
+        android:id="@+id/button_cancel_taskf"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button android:text="Frg Cancel Chain" android:layout_width="wrap_content"
+        android:id="@+id/button_cancel_chainf"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+</RelativeLayout>

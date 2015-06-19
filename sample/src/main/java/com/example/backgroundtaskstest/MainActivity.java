@@ -2,20 +2,20 @@ package com.example.backgroundtaskstest;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.github.slezadav.backgroundTasks.BackgroundTasks;
-import com.github.slezadav.backgroundTasks.BaseTask;
-import com.github.slezadav.backgroundTasks.BaseTask.ExecutionType;
+import com.github.slezadav.backgroundTasks.BgTasks;
+import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 import com.github.slezadav.backgroundTasks.TaskChain;
 
 
-public class MainActivity extends FragmentActivity implements BaseTask.IBaseTaskCallbacks {
+public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
-    private static final String TASKTAG="task";
-    private static final String CHAINTAG="chain";
+    public static final String TASKTAG="task";
+    public static final String CHAINTAG="chain";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,7 +24,7 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
         task.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BackgroundTasks.startTask(MainActivity.this, TASKTAG, new TestTask());
+                BgTasks.startTask(MainActivity.this, TASKTAG, new TestTask());
             }
         });
         Button chain= (Button) findViewById(R.id.button_chain);
@@ -35,66 +35,31 @@ public class MainActivity extends FragmentActivity implements BaseTask.IBaseTask
                 chain.addTask(new TestTask());
                 chain.addTask(new TestTask());
                 chain.addTask(new TestTask());
-                BackgroundTasks.startTaskChain(MainActivity.this, chain);
+                BgTasks.startTaskChain(MainActivity.this, chain);
             }
         });
         Button cchain= (Button) findViewById(R.id.button_cancel_chain);
         cchain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BackgroundTasks.cancelTask(MainActivity.this, CHAINTAG);
+                BgTasks.cancelTask(MainActivity.this, CHAINTAG);
             }
         });
         Button ctask= (Button) findViewById(R.id.button_cancel_task);
         ctask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BackgroundTasks.cancelTask(MainActivity.this, TASKTAG);
+                BgTasks.cancelTask(MainActivity.this, TASKTAG);
             }
         });
 
-        Button tasks= (Button) findViewById(R.id.button_task_service);
-        tasks.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BackgroundTasks.startTask(MainActivity.this,TASKTAG,new TestTask(), BaseTask.ExecutionType.SERVICE_LOCAL);
-            }
-        });
-        Button tasksr= (Button) findViewById(R.id.button_task_service_remote);
-        tasksr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BackgroundTasks.startTask(MainActivity.this,TASKTAG,new TestTask(), ExecutionType.SERVICE_REMOTE);
-            }
-        });
-        Button chains= (Button) findViewById(R.id.button_chain_service);
-        chains.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TaskChain chain=new TaskChain(CHAINTAG);
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                BackgroundTasks.startTaskChain(MainActivity.this,chain, BaseTask.ExecutionType.SERVICE_LOCAL);
-            }
-        });
-        Button chainsr= (Button) findViewById(R.id.button_chain_service_remote);
-        chainsr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TaskChain chain=new TaskChain(CHAINTAG);
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                BackgroundTasks.startTaskChain(MainActivity.this,chain, ExecutionType.SERVICE_REMOTE);
-            }
-        });
+        FragmentManager fm= getSupportFragmentManager();
+        fm.beginTransaction().add(R.id.contatiner,new TestFragment(),"TestTag").commit();
     }
 
 
     @Override
     public void onTaskReady(Object tag) {
-
         Log.i("TAG","onTaskReady "+tag);
     }
 
