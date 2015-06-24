@@ -292,7 +292,7 @@ public class TaskFragment extends Fragment {
      * @param tag task tag
      */
     protected void handlePreExecute(IBgTaskCallbacks callbacks, Object tag) {
-        if (callbacks != null && !isTaskChained(tag)) {
+        if (callbacks != null && !isTaskChained(tag)&& !isChainInProgress(tag)) {
             callbacks.onTaskReady(tag);
         }
     }
