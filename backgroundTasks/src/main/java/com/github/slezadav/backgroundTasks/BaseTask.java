@@ -125,12 +125,12 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     }
 
     @Override
-    protected void onCancelled() {
+    protected void onCancelled(Object result) {
         if (!canAskForCallbacks()) {
             return;
         }
         if (canUseCallbacks()) {
-            mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag());
+            mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag(),result);
         }
 
     }

@@ -24,8 +24,9 @@ public interface IBgTaskCallbacks {
     /**
      * Triggered when the task or chain has been cancelled
      * @param tag task or chain tag
+     * @param result result
      */
-    void onTaskCancelled(Object tag);
+    void onTaskCancelled(Object tag,Object result);
 
     /**
      * Triggered when the task or chain finishes successfully

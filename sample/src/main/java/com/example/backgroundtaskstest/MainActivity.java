@@ -62,13 +62,12 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
     @Override
     public void onTaskProgressUpdate(Object tag, Object... progress) {
-       // Object[] pr= (Object[]) progress[0];
         Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
     }
 
     @Override
-    public void onTaskCancelled(Object tag) {
-        Log.i("TAG","onTaskCancel "+tag);
+    public void onTaskCancelled(Object tag,Object result) {
+        Log.i("TAG","onTaskCancel "+tag+"   "+result);
     }
 
     @Override

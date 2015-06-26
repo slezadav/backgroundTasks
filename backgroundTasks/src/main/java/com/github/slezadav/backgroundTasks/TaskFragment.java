@@ -302,14 +302,14 @@ public class TaskFragment extends Fragment {
      * @param callbacks callbacks where to notify cancellation
      * @param tag tag task
      */
-    protected void handleCancel(IBgTaskCallbacks callbacks, Object tag) {
+    protected void handleCancel(IBgTaskCallbacks callbacks, Object tag,Object result) {
         if (isTaskChained(tag)) {
             tag = removeChainResidue(tag);
         } else {
             cancelTask(tag);
         }
         if (callbacks != null) {
-            callbacks.onTaskCancelled(tag);
+            callbacks.onTaskCancelled(tag,result);
         }
     }
 
