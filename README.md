@@ -11,10 +11,8 @@ dependencies {
 }
 ```
 
-# Basic Info
-First of all, note that all background tasks used with this library have to extend `BaseTask` class which is based on Android's `AsyncTask`.Right now `BaseTask` is not typed and behaves like `AsyncTask<Object,Object,Object>`. Using custom types might be included in future releases. All tasks are run in a retained fragment. 
-
 # Defining a task
+First of all, note that all background tasks used with this library have to extend `BaseTask` class which is based on Android's `AsyncTask`.Right now `BaseTask` is not typed and behaves like `AsyncTask<Object,Object,Object>`. Using custom types might be included in future releases. All tasks are run in a retained fragment. 
 The simplest example of a custom task is something like this:
 
 ```java
