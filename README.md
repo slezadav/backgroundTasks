@@ -7,14 +7,12 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.2.1'
+    compile 'com.github.slezadav:backgroundTasks:1.2.3'
 }
 ```
 
-# Basic Info
-First of all, note that all background tasks used with this library have to extend `BaseTask` class which is based on Android's `AsyncTask`.Right now `BaseTask` is not typed and behaves like `AsyncTask<Object,Object,Object>`. Using custom types might be included in future releases. All tasks are run in a retained fragment. 
-
 # Defining a task
+First of all, note that all background tasks used with this library have to extend `BaseTask` class which is based on Android's `AsyncTask`.Right now `BaseTask` is not typed and behaves like `AsyncTask<Object,Object,Object>`. Using custom types might be included in future releases. All tasks are run in a retained fragment. 
 The simplest example of a custom task is something like this:
 
 ```java
@@ -99,7 +97,7 @@ BgTasks.cancelTask(activity/*or fragment*/,tag);
 ```
 
 # Task chains
-A  `TaskChain` is an entity consisting of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
+A `TaskChain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. It consists of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
 Example of constructing a chain where second task uses the firs task's results :
 ```java
 TaskChain chain=new TaskChain(MY_CHAIN_TAG);
@@ -110,8 +108,7 @@ BgTasks.startTaskChain(this,chain);
 ```
 Note: If the task has its own params, the results of the previous tasks are appended to the end of param array.
 
-
-A `TaskChain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. Its usage has the same rules as using simple tasks described before.There are some differences however:
+Chain usage has the same rules as using simple tasks described before.There are some differences however:
 
 * `TaskChain` has a single tag that propagates to callbacks
 * `TaskChain` will never trigger `onTaskReady(Object tag)`
