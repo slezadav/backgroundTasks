@@ -159,8 +159,8 @@ public class TaskFragment extends Fragment {
             if (callbackId != null) {
                 callbacks = findFragmentByTagOrId(callbackId);
             } else if (getActivity() != null &&
-                       IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
-                callbacks = (IBgTaskCallbacks) getActivity();
+                       IBgTaskSimpleCallbacks.class.isAssignableFrom(getActivity().getClass())) {
+                callbacks = (IBgTaskSimpleCallbacks) getActivity();
             }
             task.setCallbacks(callbacks);
             if (!task.isReady()) {
