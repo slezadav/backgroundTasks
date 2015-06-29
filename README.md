@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.2.3'
+    compile 'com.github.slezadav:backgroundTasks:1.2.4'
 }
 ```
 
@@ -30,13 +30,15 @@ public class MyTask extends BaseTask {
 As with AsyncTask you can you can use methods like `publishProgress(Object object)`,`cancel(Boolean mayInterruptIfRunning)`,`get()` and so on.
 
 #Task callbacks
-In order to start a task your `Activity` or `Fragment` must implement `IBgTaskCallbacks` interface, by which the results are delivered. This interface consists of the following methods:
+In order to start a task your `Activity` or `Fragment` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
 
 * `onTaskReady(Object tag)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
 * `onTaskCancelled(Object tag,Object result)` - called after the task has been cancelled 
 * `onTaskSuccess(Object tag, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
 * `onTaskFail(Object tag, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
+
+If you use `IBgTaskSimpleCallbacks` only `onTaskSuccess(Object tag, Object result)` and `onTaskFail(Object tag, Exception exception)` are in use.
 
 These callbacks will be delivered even if orientation change occurs. In case the task should deliver the callback in the exact moment when the activity is recreated, it will be delivered during `onResume()` lifecycle call.
 These callbacks are kept as `WeakReference`s and reassigned whenever the activity or fragment is recreated so the leaks should never occur.
@@ -57,28 +59,13 @@ Tasks can also be used as an ordinary `AsyncTask` from anywhere else (in this ca
 
 Simple example of starting a task from activity:
 ```java
-public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
+public class MainActivity extends FragmentActivity implements IBgTaskSimpleCallbacks {
 public static final String TASKTAG="my_task";
 
  private void start(){
      BgTasks.startTask(this, TASKTAG, new MyTask());
  }
-
- @Override
- public void onTaskReady(Object tag) {
-     Log.i("TAG","onTaskReady "+tag);
- }
-
- @Override
- public void onTaskProgressUpdate(Object tag, Object... progress) {
-    Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
- }
-
- @Override
- public void onTaskCancelled(Object tag,Object result) {
-    Log.i("TAG","onTaskCancel "+tag+"   "+result);
- }
-
+ 
  @Override
  public void onTaskSuccess(Object tag, Object result) {
     Log.i("TAG","onTaskSuccess "+tag+"   "+result);
