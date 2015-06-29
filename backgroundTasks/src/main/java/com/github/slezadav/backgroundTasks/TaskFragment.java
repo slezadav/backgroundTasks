@@ -233,8 +233,8 @@ public class TaskFragment extends Fragment {
             IBgTaskSimpleCallbacks callbacks = null;
             if (task.getCallbacksId() != null) {
                 callbacks = findFragmentByTagOrId(task.getCallbacksId());
-            } else if (IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
-                callbacks = (IBgTaskCallbacks) getActivity();
+            } else if (IBgTaskSimpleCallbacks.class.isAssignableFrom(getActivity().getClass())) {
+                callbacks = (IBgTaskSimpleCallbacks) getActivity();
             }
             handlePostExecute(callbacks, tag, result);
             iterator.remove();
@@ -255,10 +255,11 @@ public class TaskFragment extends Fragment {
                     Object failingTag = removeChainResidue(tag);
                     callbacks.onTaskFail(failingTag, (Exception) result);
                 } else {
+                    continueChain(tag, result);
                     if(callbacks instanceof IBgTaskCallbacks){
                         ((IBgTaskCallbacks)callbacks).onTaskProgressUpdate(getChainFinalTag(tag), result);
                     }
-                    continueChain(tag, result);
+
                 }
             } else {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
