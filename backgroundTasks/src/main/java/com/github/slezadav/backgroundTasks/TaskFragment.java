@@ -69,7 +69,7 @@ public class TaskFragment extends Fragment {
      * @return Fragment which should be used for callbacks
      */
     @Nullable
-    private IBgTaskCallbacks findFragmentByTagOrId(Object id) {
+    private IBgTaskSimpleCallbacks findFragmentByTagOrId(Object id) {
         FragmentManager fm=getActivity().getSupportFragmentManager();
         Fragment fragment=null;
         if(id instanceof String){
@@ -77,8 +77,8 @@ public class TaskFragment extends Fragment {
         }else if (id instanceof Integer){
             fragment = fm.findFragmentById((Integer) id);
         }
-        if(fragment!=null&&IBgTaskCallbacks.class.isAssignableFrom(fragment.getClass())){
-            return (IBgTaskCallbacks) fragment;
+        if(fragment!=null&&IBgTaskSimpleCallbacks.class.isAssignableFrom(fragment.getClass())){
+            return (IBgTaskSimpleCallbacks) fragment;
         }
         return null;
     }
@@ -155,7 +155,7 @@ public class TaskFragment extends Fragment {
     private void startUnfinishedTasks() {
         for (BaseTask task : mTasks.keySet()) {
             Object callbackId = task.getCallbacksId();
-            IBgTaskCallbacks callbacks = null;
+            IBgTaskSimpleCallbacks callbacks = null;
             if (callbackId != null) {
                 callbacks = findFragmentByTagOrId(callbackId);
             } else if (getActivity() != null &&
@@ -185,11 +185,11 @@ public class TaskFragment extends Fragment {
         task.setTag(tag);
         task.setEnclosingFragment(this);
         Object callbackId = task.getCallbacksId();
-        IBgTaskCallbacks callbacks = null;
+        IBgTaskSimpleCallbacks callbacks = null;
         if (callbackId != null) {
             callbacks = findFragmentByTagOrId(callbackId);
-        } else if (getActivity() != null && IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
-            callbacks = (IBgTaskCallbacks) getActivity();
+        } else if (getActivity() != null && IBgTaskSimpleCallbacks.class.isAssignableFrom(getActivity().getClass())) {
+            callbacks = (IBgTaskSimpleCallbacks) getActivity();
         }
         if (callbacks != null) {
             task.setReady(true);
@@ -230,7 +230,7 @@ public class TaskFragment extends Fragment {
             BaseTask task = setElement.getKey();
             Object tag = task.getTag();
             Object result = setElement.getValue();
-            IBgTaskCallbacks callbacks = null;
+            IBgTaskSimpleCallbacks callbacks = null;
             if (task.getCallbacksId() != null) {
                 callbacks = findFragmentByTagOrId(task.getCallbacksId());
             } else if (IBgTaskCallbacks.class.isAssignableFrom(getActivity().getClass())) {
@@ -247,7 +247,7 @@ public class TaskFragment extends Fragment {
      * @param tag task tag
      * @param result task result
      */
-    protected void handlePostExecute(IBgTaskCallbacks callbacks, Object tag, Object result) {
+    protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
         if (callbacks != null) {
             completeTask(tag);
             if (isTaskChained(tag)) {
@@ -255,7 +255,9 @@ public class TaskFragment extends Fragment {
                     Object failingTag = removeChainResidue(tag);
                     callbacks.onTaskFail(failingTag, (Exception) result);
                 } else {
-                    callbacks.onTaskProgressUpdate(getChainFinalTag(tag), result);
+                    if(callbacks instanceof IBgTaskCallbacks){
+                        ((IBgTaskCallbacks)callbacks).onTaskProgressUpdate(getChainFinalTag(tag), result);
+                    }
                     continueChain(tag, result);
                 }
             } else {
@@ -302,14 +304,15 @@ public class TaskFragment extends Fragment {
      * @param callbacks callbacks where to notify cancellation
      * @param tag tag task
      */
-    protected void handleCancel(IBgTaskCallbacks callbacks, Object tag,Object result) {
+    protected void handleCancel(IBgTaskSimpleCallbacks callbacks, Object tag,Object result) {
         if (isTaskChained(tag)) {
             tag = removeChainResidue(tag);
+
         } else {
             cancelTask(tag);
         }
-        if (callbacks != null) {
-            callbacks.onTaskCancelled(tag,result);
+        if (callbacks != null && callbacks instanceof IBgTaskCallbacks) {
+            ((IBgTaskCallbacks)callbacks).onTaskCancelled(tag,result);
         }
     }
 
@@ -382,7 +385,7 @@ public class TaskFragment extends Fragment {
      * @param failingTag tag of the task which failed
      * @return Chain's final tag
      */
-    private Object removeChainResidue(Object failingTag) {
+    protected Object removeChainResidue(Object failingTag) {
         FutureTask ft;
         while (mChainedTasks.containsKey(failingTag)) {
             ft = mChainedTasks.get(failingTag);

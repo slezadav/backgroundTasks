@@ -4,7 +4,7 @@ package com.github.slezadav.backgroundTasks;
  * Interface used to define the callbacks
  * Created by david.slezak on 19.6.2015.
  */
-public interface IBgTaskCallbacks {
+public interface IBgTaskCallbacks extends IBgTaskSimpleCallbacks{
     /**
      * Triggered when the task is ready to execute
      *
@@ -28,17 +28,4 @@ public interface IBgTaskCallbacks {
      */
     void onTaskCancelled(Object tag,Object result);
 
-    /**
-     * Triggered when the task or chain finishes successfully
-     * @param tag task or chain tag
-     * @param result result returned from task
-     */
-    void onTaskSuccess(Object tag, Object result);
-
-    /**
-     * Triggered when the task or chain failed
-     * @param tag task or chain tag
-     * @param exception failing exception
-     */
-    void onTaskFail(Object tag, Exception exception);
 }

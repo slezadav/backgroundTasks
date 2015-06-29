@@ -70,8 +70,8 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
     }
 
     @Override
-    public void onTaskCancelled(Object tag) {
-        Log.i("TAG","onTaskCancel "+tag);
+    public void onTaskCancelled(Object tag, Object result) {
+        Log.i("TAG","onTaskCancel "+tag+"    "+result);
     }
 
     @Override

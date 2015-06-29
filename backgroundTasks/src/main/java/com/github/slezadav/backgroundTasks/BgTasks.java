@@ -19,7 +19,7 @@ public class BgTasks {
      * @param params   optional params for the task
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
-    public static <T extends FragmentActivity & IBgTaskCallbacks> void startTask(T activity, Object tag,
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity, Object tag,
                                                                                  BaseTask task, Object... params) {
         getFragment(activity).startTask(tag, task, params);
     }
@@ -33,7 +33,7 @@ public class BgTasks {
      * @param params   optional params for the task
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
-    public static <T extends Fragment & IBgTaskCallbacks> void startTask(T fragment, Object tag, BaseTask task,
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment, Object tag, BaseTask task,
                                                                          Object... params) {
         Object id=getIdTagOrIdFromFragment(fragment);
         task.setCallbacksId(id);
@@ -47,7 +47,7 @@ public class BgTasks {
      * @param chain    chain to be started
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
-    public static <T extends FragmentActivity & IBgTaskCallbacks> void startTaskChain(T activity, TaskChain
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTaskChain(T activity, TaskChain
             chain) {
         if (chain.tasks.isEmpty()) {
             throw new IllegalStateException("Cannot execute empty chain");
@@ -62,7 +62,7 @@ public class BgTasks {
      * @param chain    chain to be started
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
-    public static <T extends Fragment & IBgTaskCallbacks> void startTaskChain(T fragment, TaskChain chain) {
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTaskChain(T fragment, TaskChain chain) {
         Object id=getIdTagOrIdFromFragment(fragment);
         for (BaseTask task : chain.tasks) {
             task.setCallbacksId(id);
@@ -80,7 +80,7 @@ public class BgTasks {
      * @param tag      tag of the task to be cancelled
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
-    public static <T extends FragmentActivity & IBgTaskCallbacks> void cancelTask(T activity, Object tag) {
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void cancelTask(T activity, Object tag) {
         getFragment(activity).cancelTask(tag);
     }
 
@@ -91,7 +91,7 @@ public class BgTasks {
      * @param tag      tag of the task to be cancelled
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
-    public static <T extends Fragment & IBgTaskCallbacks> void cancelTask(T fragment, Object tag) {
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void cancelTask(T fragment, Object tag) {
         getFragment(fragment).cancelTask(tag);
     }
 
@@ -103,7 +103,7 @@ public class BgTasks {
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      * @return true if the task with given tag is in progress
      */
-    public static <T extends FragmentActivity & IBgTaskCallbacks> boolean isTaskInProgress(T activity, Object
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T activity, Object
             tag) {
         return getFragment(activity).isTaskInProgress(tag,true);
     }
@@ -116,7 +116,7 @@ public class BgTasks {
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      * @return true if the task with given tag is in progress
      */
-    public static <T extends Fragment & IBgTaskCallbacks> boolean isTaskInProgress(T fragment, Object tag) {
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T fragment, Object tag) {
         return getFragment(fragment).isTaskInProgress(tag,true);
     }
 
@@ -127,7 +127,7 @@ public class BgTasks {
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      * @return TaskFragment instance for performing background tasks
      */
-    private static <T extends FragmentActivity & IBgTaskCallbacks> TaskFragment getFragment(T activity) {
+    private static <T extends FragmentActivity & IBgTaskSimpleCallbacks> TaskFragment getFragment(T activity) {
         FragmentManager fm = activity.getSupportFragmentManager();
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {
@@ -145,7 +145,7 @@ public class BgTasks {
      * @param <T> Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      * @return TaskFragment instance for performing background tasks
      */
-    private static <T extends Fragment & IBgTaskCallbacks> TaskFragment getFragment(T fr) {
+    private static <T extends Fragment & IBgTaskSimpleCallbacks> TaskFragment getFragment(T fr) {
         FragmentManager fm = fr.getActivity().getSupportFragmentManager();
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {

@@ -13,7 +13,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     /**
      * Weak reference to activity or fragment serving as callbacks
      */
-    private WeakReference<IBgTaskCallbacks> mCallbacks;
+    private WeakReference<IBgTaskSimpleCallbacks> mCallbacks;
     /**
      * Weak reference to the TaskFragment which started this task
      */
@@ -49,12 +49,15 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         this.mCallbacksId = callbacksId;
     }
 
+    private boolean fullCallBacks;
+
     /**
      * Sets the callbacks for this task
      *
      * @param clb Callbacks to be used with this task
      */
-    protected void setCallbacks(IBgTaskCallbacks clb) {
+    protected void setCallbacks(IBgTaskSimpleCallbacks clb) {
+        fullCallBacks=clb instanceof IBgTaskCallbacks;
         this.mCallbacks = new WeakReference<>(clb);
     }
 
@@ -108,8 +111,8 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         if (!canAskForCallbacks()) {
             return;
         }
-        if (canUseCallbacks()) {
-            mEnclosingFragment.get().handlePreExecute(mCallbacks.get(), getTag());
+        if (canUseCallbacks()&&fullCallBacks) {
+            mEnclosingFragment.get().handlePreExecute((IBgTaskCallbacks) mCallbacks.get(), getTag());
         }
     }
 
@@ -119,8 +122,8 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         if (!canAskForCallbacks()) {
             return;
         }
-        if (canUseCallbacks()) {
-            mEnclosingFragment.get().handleProgress(mCallbacks.get(), getTag(), (Object[]) progress);
+        if (canUseCallbacks()&&fullCallBacks) {
+            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), getTag(), (Object[]) progress);
         }
     }
 
