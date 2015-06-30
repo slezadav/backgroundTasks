@@ -103,7 +103,7 @@ public class TaskFragment extends Fragment {
      */
     private void executeTask(BaseTask task, Object... params) {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-            task.executeOnExecutor(BaseTask.THREAD_POOL_EXECUTOR, params);
+            task.executeOnExecutor(task.getExecutor(), params);
         } else {
             task.execute(params);
         }

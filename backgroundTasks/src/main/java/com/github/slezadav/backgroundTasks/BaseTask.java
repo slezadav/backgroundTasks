@@ -1,9 +1,12 @@
 package com.github.slezadav.backgroundTasks;
 
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.support.v4.app.Fragment;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
 
 /**
  * Task class meant to be extended and used with TaskFragment. This is a base class for all BackgroundTasks
@@ -50,7 +53,15 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         this.mCallbacksId = callbacksId;
     }
 
+    /**
+     * Indicates whether simple or full callbacks are used
+     */
     private boolean fullCallBacks;
+
+    /**
+     * Custom executor to be used
+     */
+    private Executor mExecutor;
 
     /**
      * Sets the callbacks for this task
@@ -78,6 +89,26 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     public Object getTag() {
         return mTag;
+    }
+
+    /**
+     * Gets the tasks's executor
+     * @return Executor if specified or default one
+     */
+    protected Executor getExecutor(){
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+            return mExecutor != null ? mExecutor : THREAD_POOL_EXECUTOR;
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * Sets the executor to this task
+     * @param executor executor to be set
+     */
+    protected void setExecutor(Executor executor){
+        this.mExecutor=executor;
     }
 
     /**

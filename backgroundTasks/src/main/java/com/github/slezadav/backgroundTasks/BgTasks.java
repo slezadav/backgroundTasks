@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
+import java.util.concurrent.Executor;
+
 /**
  * Class used as static entry point to the library.
  *
@@ -22,6 +24,38 @@ public class BgTasks {
     public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity, Object tag,
                                                                                  BaseTask task, Object... params) {
         getFragment(activity).startTask(tag, task, params);
+    }
+
+    /**
+     * Method that starts the task from activity. The task will run on supplied executor
+     *
+     * @param activity activity to which the callbacks should be delivered
+     * @param executor executor to be used
+     * @param tag      tag by which the task is identified
+     * @param task     task to be started
+     * @param params   optional params for the task
+     * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
+     */
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity,Executor executor, Object tag,
+                                                                                       BaseTask task, Object... params) {
+        task.setExecutor(executor);
+        getFragment(activity).startTask(tag, task, params);
+    }
+
+    /**
+     * Method that starts the task from fragment. The task will run on supplied executor
+     *
+     * @param fragment fragment to which the callbacks should be delivered
+     * @param executor executor to be used
+     * @param tag      tag by which the task is identified
+     * @param task     task to be started
+     * @param params   optional params for the task
+     * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
+     */
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment,Executor executor, Object tag,
+                                                                                       BaseTask task, Object... params) {
+        task.setExecutor(executor);
+        getFragment(fragment).startTask(tag, task, params);
     }
 
     /**
