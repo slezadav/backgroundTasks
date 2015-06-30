@@ -1,6 +1,7 @@
 package com.github.slezadav.backgroundTasks;
 
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 
 import java.lang.ref.WeakReference;
 
@@ -163,6 +164,13 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      * @return true if any callback can be fired
      */
     private boolean canUseCallbacks(){
-        return mCallbacks.get() != null && mEnclosingFragment.get() != null;
+        IBgTaskSimpleCallbacks clb=mCallbacks.get();
+        boolean callbacksValid=clb != null;
+        boolean detached=false;
+        if(clb instanceof Fragment){
+            detached=((Fragment)clb).isDetached();
+        }
+        boolean taskFragmentValid=mEnclosingFragment.get() != null;
+        return callbacksValid&&taskFragmentValid&&!detached;
     }
 }
