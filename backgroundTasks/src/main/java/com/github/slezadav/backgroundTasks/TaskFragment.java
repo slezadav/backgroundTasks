@@ -1,7 +1,5 @@
 package com.github.slezadav.backgroundTasks;
 
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -102,11 +100,13 @@ public class TaskFragment extends Fragment {
      * @param params params passed to the task
      */
     private void executeTask(BaseTask task, Object... params) {
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-            task.executeOnExecutor(task.getExecutor(), params);
-        } else {
-            task.execute(params);
-        }
+        task.executeWithCustomExecutor(params);
+//        task.executeOnExecutor(task.getExecutor(), params);
+//        if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+//            task.executeOnExecutor(task.getExecutor(), params);
+//        } else {
+//            task.execute(params);
+//        }
 
     }
 
@@ -249,17 +249,15 @@ public class TaskFragment extends Fragment {
      */
     protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
         if (callbacks != null) {
-            completeTask(tag);
             if (isTaskChained(tag)) {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
                     Object failingTag = removeChainResidue(tag);
                     callbacks.onTaskFail(failingTag, (Exception) result);
                 } else {
-                    continueChain(tag, result);
                     if(callbacks instanceof IBgTaskCallbacks){
                         ((IBgTaskCallbacks)callbacks).onTaskProgressUpdate(getChainFinalTag(tag), result);
                     }
-
+                    continueChain(tag, result);
                 }
             } else {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
@@ -268,6 +266,7 @@ public class TaskFragment extends Fragment {
                     callbacks.onTaskSuccess(tag, result);
                 }
             }
+            completeTask(tag);
         }
 
     }
@@ -283,6 +282,7 @@ public class TaskFragment extends Fragment {
             return;
         }
         if (isTaskChained(tag)) {
+
             callbacks.onTaskProgressUpdate(getChainFinalTag(tag), (Object[]) progress);
         } else {
             callbacks.onTaskProgressUpdate(tag, (Object[]) progress);

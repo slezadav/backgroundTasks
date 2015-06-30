@@ -6,7 +6,9 @@ import android.os.Build.VERSION_CODES;
 import android.support.v4.app.Fragment;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Task class meant to be extended and used with TaskFragment. This is a base class for all BackgroundTasks
@@ -31,7 +33,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     private boolean mReady;
     /**
-     *Tag or id of the fragment used as a callback point, null if callback is an activity
+     * Tag or id of the fragment used as a callback point, null if callback is an activity
      */
     private Object mCallbacksId;
 
@@ -69,7 +71,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      * @param clb Callbacks to be used with this task
      */
     protected void setCallbacks(IBgTaskSimpleCallbacks clb) {
-        fullCallBacks=clb instanceof IBgTaskCallbacks;
+        fullCallBacks = clb instanceof IBgTaskCallbacks;
         this.mCallbacks = new WeakReference<>(clb);
     }
 
@@ -93,23 +95,74 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 
     /**
      * Gets the tasks's executor
+     *
      * @return Executor if specified or default one
      */
-    protected Executor getExecutor(){
+    protected Executor getExecutor() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
             return mExecutor != null ? mExecutor : THREAD_POOL_EXECUTOR;
-        }else{
+        } else {
             return null;
         }
     }
 
     /**
      * Sets the executor to this task
+     *
      * @param executor executor to be set
      */
-    protected void setExecutor(Executor executor){
-        this.mExecutor=executor;
+    protected void setExecutor(Executor executor) {
+        this.mExecutor = executor;
     }
+
+    public final AsyncTask<Object, Object, Object> executeWithCustomExecutor(Object... params) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+            return executeOnExecutor(getExecutor(), params);
+        } else {
+            try {
+                Field f = AsyncTask.class.getDeclaredField("mStatus"); //NoSuchFieldException
+                f.setAccessible(true);
+                Status status = (Status) f.get(this);
+                if (status != Status.PENDING) {
+                    switch (status) {
+                        case RUNNING:
+                            throw new IllegalStateException(
+                                    "Cannot execute task:" + " the task is already running.");
+                        case FINISHED:
+                            throw new IllegalStateException(
+                                    "Cannot execute task:" + " the task has already been executed " +
+                                    "(a task can be executed only once)");
+                    }
+                }
+                f.set(this, Status.RUNNING);
+                onPreExecute();
+                Class<?> clazz = Class.forName("android.os.AsyncTask$WorkerRunnable");
+                f = AsyncTask.class.getDeclaredField("mWorker");
+                f.setAccessible(true);
+                Object o=f.get(this);
+                Field g = clazz.getDeclaredField("mParams");
+                  g.setAccessible(true);
+                  g.set(o, params);
+                f.set(this,o);
+                f = AsyncTask.class.getDeclaredField("mFuture"); //NoSuchFieldException
+                f.setAccessible(true);
+                if(mExecutor==null){
+                    Field ex = AsyncTask.class.getDeclaredField("sExecutor");
+                    ex.setAccessible(true);
+                    o=ex.get(this);
+                    ((ThreadPoolExecutor)o).execute((java.util.concurrent.FutureTask) f.get(this));
+                }else{
+                    mExecutor.execute((java.util.concurrent.FutureTask)f.get(this));
+                }
+                return this;
+            }catch(Exception e){
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+
 
     /**
      * Sets this task's tag
@@ -143,7 +196,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         if (!canAskForCallbacks()) {
             return;
         }
-        if (canUseCallbacks()&&fullCallBacks) {
+        if (canUseCallbacks() && fullCallBacks) {
             mEnclosingFragment.get().handlePreExecute((IBgTaskCallbacks) mCallbacks.get(), getTag());
         }
     }
@@ -154,8 +207,9 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         if (!canAskForCallbacks()) {
             return;
         }
-        if (canUseCallbacks()&&fullCallBacks) {
-            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), getTag(), (Object[]) progress);
+        if (canUseCallbacks() && fullCallBacks) {
+            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), getTag(),
+                    (Object[]) progress);
         }
     }
 
@@ -165,7 +219,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks()) {
-            mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag(),result);
+            mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag(), result);
         }
 
     }
@@ -184,24 +238,26 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 
     /**
      * Finds whether it is possible to find any type of callback
+     *
      * @return true if any callback can be fired
      */
-    private boolean canAskForCallbacks(){
+    private boolean canAskForCallbacks() {
         return mCallbacks != null && mEnclosingFragment != null;
     }
 
     /**
      * Finds whether it is possible to fire any type of callback
+     *
      * @return true if any callback can be fired
      */
-    private boolean canUseCallbacks(){
-        IBgTaskSimpleCallbacks clb=mCallbacks.get();
-        boolean callbacksValid=clb != null;
-        boolean detached=false;
-        if(clb instanceof Fragment){
-            detached=((Fragment)clb).isDetached();
+    private boolean canUseCallbacks() {
+        IBgTaskSimpleCallbacks clb = mCallbacks.get();
+        boolean callbacksValid = clb != null;
+        boolean detached = false;
+        if (clb instanceof Fragment) {
+            detached = ((Fragment) clb).isDetached();
         }
-        boolean taskFragmentValid=mEnclosingFragment.get() != null;
-        return callbacksValid&&taskFragmentValid&&!detached;
+        boolean taskFragmentValid = mEnclosingFragment.get() != null;
+        return callbacksValid && taskFragmentValid && !detached;
     }
 }
