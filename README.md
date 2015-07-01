@@ -83,6 +83,11 @@ Task can be cancelled at any time by calling:
 BgTasks.cancelTask(activity/*or fragment*/,tag);
 ```
 
+It is also possible to use custom executor by using :
+```java
+BgTasks.startTask(activity/*or fragment*/,executor,tag,task,params);
+```
+
 # Task chains
 A `TaskChain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. It consists of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
 Example of constructing a chain where second task uses the firs task's results :
