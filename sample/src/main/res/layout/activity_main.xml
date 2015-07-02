@@ -21,6 +21,24 @@
         android:layout_alignRight="@+id/button_cancel_chain"
         android:layout_alignEnd="@+id/button_cancel_chain" />
 
+    <com.example.backgroundtaskstest.TestView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Task view"
+        android:textColor="@android:color/black"
+        android:id="@+id/testView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <com.example.backgroundtaskstest.TestChainView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chain view"
+        android:textColor="@android:color/black"
+        android:id="@+id/testViewChain"
+        android:layout_below="@+id/testView"
+        android:layout_centerHorizontal="true" />
+
 
 
     <Button android:text="Cancel Task" android:layout_width="wrap_content"

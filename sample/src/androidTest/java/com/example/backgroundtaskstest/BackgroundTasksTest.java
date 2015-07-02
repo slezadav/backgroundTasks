@@ -32,6 +32,14 @@ public class BackgroundTasksTest
         singleAsyncFragmentCancel();
         chainAsyncFragment();
         chainAsyncFragmentCancel();
+        singleAsyncView();
+        singleAsyncViewFragment();
+        singleAsyncViewCancel();
+        singleAsyncViewFragmentCancel();
+        chainAsyncView();
+        chainAsyncViewCancel();
+        chainAsyncViewFragment();
+        chainAsyncFragmentViewCancel();
     }
 
 
@@ -129,6 +137,101 @@ public class BackgroundTasksTest
         solo.setActivityOrientation(Solo.LANDSCAPE);
         solo.clickOnButton("Frg Cancel Chain");
         assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel chain",3000));
+    }
+
+    public void singleAsyncView() {
+        Log.d("BackgroundTasksTest", "singleAsyncView");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.waitForActivity(MainActivity.class,
+                5000);
+        solo.clickOnButton("Task view");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady "+MainActivity.TASKTAG,1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Task did not publish progress",solo.waitForLogMessage("onTaskProgress "+MainActivity.TASKTAG,3000));
+        assertTrue("Task did not succeed",solo.waitForLogMessage("onTaskSuccess "+MainActivity.TASKTAG,5000));
+    }
+
+    public void singleAsyncViewFragment() {
+        Log.d("BackgroundTasksTest", "singleAsyncViewFragment");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.waitForActivity(MainActivity.class,
+                5000);
+        solo.clickOnButton("Frg task view");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady "+MainActivity.TASKTAG,1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Task did not publish progress",solo.waitForLogMessage("onTaskProgress "+MainActivity.TASKTAG,3000));
+        assertTrue("Task did not succeed",solo.waitForLogMessage("onTaskSuccess "+MainActivity.TASKTAG,5000));
+    }
+
+    public void singleAsyncViewCancel() {
+        Log.d("BackgroundTasksTest", "singleAsyncCancel");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Task view");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady "+MainActivity.TASKTAG,1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Task view");
+        assertTrue("Task did not cancel",solo.waitForLogMessage("onTaskCancel "+MainActivity.TASKTAG,3000));
+    }
+
+    public void singleAsyncViewFragmentCancel() {
+        Log.d("BackgroundTasksTest", "singleAsyncFragmentCancel");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Frg task view");
+        assertTrue("Task not started",solo.waitForLogMessage("onTaskReady "+TestFragment.TASKTAG,1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Frg task view");
+        assertTrue("Task did not cancel",solo.waitForLogMessage("onTaskCancel "+TestFragment.TASKTAG,3000));
+    }
+
+
+    public void chainAsyncViewFragment() {
+        Log.d("BackgroundTasksTest", "chainAsyncFragment");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Frg chain view");
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        assertTrue("Chain did not continue",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        assertTrue("Chain did not continue",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not succeed",solo.waitForLogMessage("onTaskSuccess "+TestFragment.CHAINTAG,15000));
+    }
+
+    public void chainAsyncFragmentViewCancel() {
+        Log.d("BackgroundTasksTest", "chainAsyncFragmentCancel");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Frg chain view");
+        solo.sleep(1000);
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Frg chain view");
+        assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel chain",3000));
+    }
+
+    public void chainAsyncView() {
+        Log.d("BackgroundTasksTest", "chainAsync");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Chain view");
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+MainActivity.CHAINTAG,3000));
+        assertTrue("Chain did not continue",solo.waitForLogMessage("onTaskProgress "+MainActivity.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+MainActivity.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        assertTrue("Chain did not continue",solo.waitForLogMessage("onTaskProgress "+MainActivity.CHAINTAG,3000));
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+MainActivity.CHAINTAG,3000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Chain did not succeed",solo.waitForLogMessage("onTaskSuccess "+MainActivity.CHAINTAG,15000));
+    }
+
+    public void chainAsyncViewCancel() {
+        Log.d("BackgroundTasksTest", "chainAsyncCancel");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Chain view");
+        solo.sleep(1000);
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Chain view");
+        assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel "+MainActivity.CHAINTAG,3000));
     }
 
 

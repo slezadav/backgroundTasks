@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:gravity="center"
-    android:background="@android:color/holo_green_dark">
+    android:background="@android:color/darker_gray">
     <Button android:text="Frg Task" android:layout_width="wrap_content"
         android:id="@+id/button_taskf"
         android:layout_height="wrap_content"
@@ -32,4 +32,25 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <com.example.backgroundtaskstest.TestView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Frg task view"
+        android:textColor="@android:color/black"
+        android:id="@+id/testView"
+        android:tag="frgTestView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <com.example.backgroundtaskstest.TestChainView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Frg chain view"
+        android:tag="frgChainView"
+        android:textColor="@android:color/black"
+        android:id="@+id/testViewChain"
+        android:layout_below="@+id/testView"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

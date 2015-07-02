@@ -36,6 +36,18 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     private Object mCallbacksId;
 
+
+    private CallbackType mCallbackType;
+
+
+    protected CallbackType getCallbackType(){
+        return mCallbackType;
+    }
+
+    protected void setCallbackType(CallbackType type){
+        this.mCallbackType=type;
+    }
+
     /**
      * Gets the id of the callback fragment.
      *
@@ -72,6 +84,18 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     protected void setCallbacks(IBgTaskSimpleCallbacks clb) {
         fullCallBacks = clb instanceof IBgTaskCallbacks;
         this.mCallbacks = new WeakReference<>(clb);
+    }
+
+    /**
+     * Method to get this task's callbacks
+     * @return task's callbacks
+     */
+    protected IBgTaskSimpleCallbacks getCallbacks(){
+        if(mCallbacks!=null){
+            return mCallbacks.get();
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -244,5 +268,9 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         }
         boolean taskFragmentValid = mEnclosingFragment.get() != null;
         return callbacksValid && taskFragmentValid && !detached;
+    }
+
+    protected enum CallbackType{
+        ACTIVITY,FRAGMENT,VIEW
     }
 }
