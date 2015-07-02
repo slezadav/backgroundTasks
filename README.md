@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.2.9'
+    compile 'com.github.slezadav:backgroundTasks:1.3.0'
 }
 ```
 
@@ -30,7 +30,7 @@ public class MyTask extends BaseTask {
 As with AsyncTask you can you can use methods like `publishProgress(Object object)`,`cancel(Boolean mayInterruptIfRunning)`,`get()` and so on.
 
 #Task callbacks
-In order to start a task your `Activity` or `Fragment` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
+In order to start a task your `Activity` , `Fragment` or `View` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
 
 * `onTaskReady(Object tag)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
@@ -48,13 +48,13 @@ These callbacks are kept as `WeakReference`s and reassigned whenever the activit
 Tasks are started via static methods in `BgTasks` class by calling:
 
 ```java
-BgTasks.startTask(activity/*or fragment*/,tag,task,params)
+BgTasks.startTask(activity/*(fragment,view)*/,tag,task,params)
 ```
 The `tag` parameter in the call accepts an arbitrary object which is then used to uniquely identify the task. Note that it is not possible to have more tasks with the same tag running at once in the same activity or fragment.
 
 Last parameter is a varargs used for parameters to the task.It works the same way as in AsyncTask's execute. It is also possible to pass the params to the task before it is started (constructor,setters).
 
-Currently only compatibility version of fragments and activities are supported so a task can be started with `android.support.v4.app.FragmentActivity` or `android.support.v4.app.Fragment` and everything that extends them of course.
+Currently only compatibility version of fragments and activities are supported so a task can be started with `android.support.v4.app.FragmentActivity`, `android.support.v4.app.Fragment` or `Views` attached to them and everything that extends the previous.
 Tasks can also be used as an ordinary `AsyncTask` from anywhere else (in this case orientation changes and leaks are not managed by the library !).
 
 Simple example of starting a task from activity:
@@ -80,12 +80,12 @@ public static final String TASKTAG="my_task";
 
 Task can be cancelled at any time by calling:
 ```java
-BgTasks.cancelTask(activity/*or fragment*/,tag);
+BgTasks.cancelTask(activity/*(fragment,view)*/,tag);
 ```
 
 It is also possible to use custom executor by using :
 ```java
-BgTasks.startTask(activity/*or fragment*/,executor,tag,task,params);
+BgTasks.startTask(activity/*(fragment,view)*/,executor,tag,task,params);
 ```
 
 # Task chains
