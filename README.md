@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.2.8'
+    compile 'com.github.slezadav:backgroundTasks:1.2.9'
 }
 ```
 
@@ -81,6 +81,11 @@ public static final String TASKTAG="my_task";
 Task can be cancelled at any time by calling:
 ```java
 BgTasks.cancelTask(activity/*or fragment*/,tag);
+```
+
+It is also possible to use custom executor by using :
+```java
+BgTasks.startTask(activity/*or fragment*/,executor,tag,task,params);
 ```
 
 # Task chains
