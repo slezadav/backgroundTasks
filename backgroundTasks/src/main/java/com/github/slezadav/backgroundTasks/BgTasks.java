@@ -304,7 +304,7 @@ public class BgTasks {
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {
             fragment = new TaskFragment();
-            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commit();
+            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
             fm.executePendingTransactions();
         }
         return fragment;
