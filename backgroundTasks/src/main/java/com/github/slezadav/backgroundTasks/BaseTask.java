@@ -130,6 +130,14 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     }
 
     /**
+     * Returns true if task has custom executor
+     * @return
+     */
+    protected boolean hasCustomExecutor(){
+        return mExecutor != null;
+    }
+
+    /**
      * Sets the executor to this task
      *
      * @param executor executor to be set
@@ -239,7 +247,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && !isCancelled()) {
-            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(), getTag(), result);
+            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(),this, result);
         } else if (mEnclosingFragment.get() != null && !isCancelled()) {
             mEnclosingFragment.get().onUnresolvedResult(this, result);
         }

@@ -138,13 +138,17 @@ public class TaskFragment extends Fragment {
      * @return Task with given tag
      */
     @Nullable
-    private BaseTask getTaskByTag(Object tag) {
+    private ArrayList<BaseTask> getTaskByTag(Object tag) {
+        ArrayList<BaseTask> tasks=null;
         for (BaseTask task : mTasks.keySet()) {
             if (task.getTag().equals(tag)) {
-                return task;
+                if(tasks==null){
+                    tasks=new ArrayList<>();
+                }
+                tasks.add(task);
             }
         }
-        return null;
+        return tasks;
     }
 
     /**
@@ -165,10 +169,12 @@ public class TaskFragment extends Fragment {
      * @param tag tag of the task to be cancelled
      */
     protected void cancelTask(Object tag) {
-        BaseTask task = getTaskByTag(tag);
-        if (task != null) {
-            task.cancel(true);
-            mTasks.remove(task);
+        ArrayList<BaseTask> tasks = getTaskByTag(tag);
+        if (tasks != null) {
+            for(BaseTask task:tasks){
+                task.cancel(true);
+                mTasks.remove(task);
+            }
         }
         cancelChain(tag);
     }
@@ -197,7 +203,12 @@ public class TaskFragment extends Fragment {
         if (isTaskInProgress(tag, false)) {
             Log.w(TAG, "Another instance of " + tag.toString() +
                        " already in progress");
-            return;
+
+            if(!task.hasCustomExecutor()){
+                Log.i("TAG","***");
+                task.setExecutor(getTaskByTag(tag).get(0).getExecutor());
+            }
+          //  return;
         }
         task.setTag(tag);
         task.setEnclosingFragment(this);
@@ -256,10 +267,9 @@ public class TaskFragment extends Fragment {
         while (iterator.hasNext()) {
             Map.Entry<BaseTask, Object> setElement = iterator.next();
             BaseTask task = setElement.getKey();
-            Object tag = task.getTag();
             Object result = setElement.getValue();
             reassignCallbacks(task);
-            handlePostExecute(task.getCallbacks(), tag, result);
+            handlePostExecute(task.getCallbacks(), task, result);
             iterator.remove();
         }
     }
@@ -268,29 +278,29 @@ public class TaskFragment extends Fragment {
      * Handles the task after it calls onPostExecute
      *
      * @param callbacks callback where to return the result
-     * @param tag       task tag
+     * @param task      task
      * @param result    task result
      */
-    protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
+    protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, BaseTask task, Object result) {
         if (callbacks != null) {
-            if (isTaskChained(tag)) {
+            if (isTaskChained(task.getTag())) {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                    Object failingTag = removeChainResidue(tag);
+                    BaseTask failingTag = removeChainResidue(task.getTag());
                     callbacks.onTaskFail(failingTag, (Exception) result);
                 } else {
                     if (callbacks instanceof IBgTaskCallbacks) {
-                        ((IBgTaskCallbacks) callbacks).onTaskProgressUpdate(getChainFinalTag(tag), result);
+                        ((IBgTaskCallbacks) callbacks).onTaskProgressUpdate(getChainFinalTag(task.getTag()), result);
                     }
-                    continueChain(tag, result);
+                    continueChain(task.getTag(), result);
                 }
             } else {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                    callbacks.onTaskFail(tag, (Exception) result);
+                    callbacks.onTaskFail(task, (Exception) result);
                 } else {
-                    callbacks.onTaskSuccess(tag, result);
+                    callbacks.onTaskSuccess(task, result);
                 }
             }
-            completeTask(tag);
+            completeTask(task.getTag());
         }
 
     }
@@ -334,7 +344,7 @@ public class TaskFragment extends Fragment {
      */
     protected void handleCancel(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
         if (isTaskChained(tag)) {
-            tag = removeChainResidue(tag);
+            tag = removeChainResidue(tag).getTag();
 
         } else {
             cancelTask(tag);
@@ -418,14 +428,17 @@ public class TaskFragment extends Fragment {
      * @param failingTag tag of the task which failed
      * @return Chain's final tag
      */
-    protected Object removeChainResidue(Object failingTag) {
+    protected BaseTask removeChainResidue(Object failingTag) {
         FutureTask ft;
+        BaseTask failingTask=null;
         while (mChainedTasks.containsKey(failingTag)) {
             ft = mChainedTasks.get(failingTag);
             mChainedTasks.remove(failingTag);
             failingTag = ft.tag;
+            failingTask=ft.task;
+            failingTask.setTag(failingTag);
         }
-        return failingTag;
+        return failingTask;
     }
 
     /**

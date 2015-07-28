@@ -1,11 +1,13 @@
 package com.example.backgroundtaskstest;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.github.slezadav.backgroundTasks.BaseTask;
 import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 import com.github.slezadav.backgroundTasks.TaskChain;
@@ -23,7 +25,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
         task.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.startTask(MainActivity.this, TASKTAG, new TestTask());
+                BgTasks.startTask(MainActivity.this, AsyncTask.SERIAL_EXECUTOR, TASKTAG, new TestTask());
             }
         });
         Button chain= (Button) findViewById(R.id.button_chain);
@@ -72,12 +74,12 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
     }
 
     @Override
-    public void onTaskSuccess(Object tag, Object result) {
-        Log.i("TAG","onTaskSuccess "+tag+"   "+result);
+    public void onTaskSuccess(BaseTask task, Object result) {
+        Log.i("TAG","onTaskSuccess "+task.getTag()+"   "+result);
     }
 
     @Override
-    public void onTaskFail(Object tag, Exception exception) {
-        Log.i("TAG","onTaskFail "+tag);
+    public void onTaskFail(BaseTask task, Exception exception) {
+        Log.i("TAG","onTaskFail "+task.getTag());
     }
 }

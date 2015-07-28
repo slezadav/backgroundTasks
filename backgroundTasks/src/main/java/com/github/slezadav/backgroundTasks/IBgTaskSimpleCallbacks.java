@@ -7,15 +7,15 @@ package com.github.slezadav.backgroundTasks;
 public interface IBgTaskSimpleCallbacks  {
     /**
      * Triggered when the task or chain finishes successfully
-     * @param tag task or chain tag
+     * @param task task or chain tag
      * @param result result returned from task
      */
-    void onTaskSuccess(Object tag, Object result);
+    void onTaskSuccess(BaseTask task, Object result);
 
     /**
      * Triggered when the task or chain failed
-     * @param tag task or chain tag
+     * @param task task or chain tag
      * @param exception failing exception
      */
-    void onTaskFail(Object tag, Exception exception);
+    void onTaskFail(BaseTask task, Exception exception);
 }

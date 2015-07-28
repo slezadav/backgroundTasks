@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import com.github.slezadav.backgroundTasks.BaseTask;
 import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 import com.github.slezadav.backgroundTasks.TaskChain;
@@ -75,12 +76,12 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
     }
 
     @Override
-    public void onTaskSuccess(Object tag, Object result) {
-        Log.i("TAG","onTaskSuccess "+tag+"   "+result);
+    public void onTaskSuccess(BaseTask task, Object result) {
+        Log.i("TAG","onTaskSuccess "+task.getTag()+"   "+result);
     }
 
     @Override
-    public void onTaskFail(Object tag, Exception exception) {
-        Log.i("TAG","onTaskFail "+tag);
+    public void onTaskFail(BaseTask task, Exception exception) {
+        Log.i("TAG","onTaskFail "+task.getTag());
     }
 }
