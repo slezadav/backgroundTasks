@@ -108,7 +108,9 @@ public class BackgroundTasksTest
         Log.d("BackgroundTasksTest", "chainAsyncFragment");
         solo.setActivityOrientation(Solo.PORTRAIT);
         solo.clickOnButton("Frg Chain");
+        assertTrue("Chain was not ready", solo.waitForLogMessage("onTaskReady " + TestFragment.CHAINTAG, 3000));
         assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
+        assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskSuccess "+TestFragment.CHAINTAG,3000));
         assertTrue("Chain did not continue",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));
         solo.setActivityOrientation(Solo.LANDSCAPE);
         assertTrue("Chain did not publish progress",solo.waitForLogMessage("onTaskProgress "+TestFragment.CHAINTAG,3000));

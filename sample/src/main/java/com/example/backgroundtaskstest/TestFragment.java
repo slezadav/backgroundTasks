@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 
 import com.github.slezadav.backgroundTasks.BaseTask;
 import com.github.slezadav.backgroundTasks.BgTasks;
+import com.github.slezadav.backgroundTasks.BgTaskChain;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
-import com.github.slezadav.backgroundTasks.TaskChain;
 
 
 /**
@@ -37,11 +37,8 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
         mRoot.findViewById(R.id.button_chainf).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                TaskChain chain=new TaskChain(CHAINTAG);
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                chain.addTask(new TestTask());
-                BgTasks.startTaskChain(TestFragment.this, chain);
+                new BgTaskChain(TestFragment.this).addTask(CHAINTAG, new TestTask()).addTask(CHAINTAG,
+                        new TestTask()).addTask(CHAINTAG, new TestTask()).run();
             }
         });
         mRoot.findViewById(R.id.button_cancel_taskf).setOnClickListener(new OnClickListener() {
@@ -59,15 +56,14 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
         return mRoot;
     }
 
-
     @Override
-    public void onTaskReady(Object tag) {
-        Log.i("TAG", "onTaskReady " + tag);
+    public void onTaskReady(BaseTask task) {
+        Log.i("TAG", "onTaskReady " + task.getTag());
     }
 
     @Override
-    public void onTaskProgressUpdate(Object tag, Object... progress) {
-        Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
+    public void onTaskProgressUpdate(BaseTask task, Object... progress) {
+        Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
     }
 
     @Override

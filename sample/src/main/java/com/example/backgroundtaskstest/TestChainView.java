@@ -8,8 +8,8 @@ import android.widget.Button;
 
 import com.github.slezadav.backgroundTasks.BaseTask;
 import com.github.slezadav.backgroundTasks.BgTasks;
+import com.github.slezadav.backgroundTasks.BgTaskChain;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
-import com.github.slezadav.backgroundTasks.TaskChain;
 
 /**
  * View used for testing
@@ -32,13 +32,13 @@ public class TestChainView extends Button implements IBgTaskCallbacks {
     }
 
     @Override
-    public void onTaskReady(Object tag) {
-        Log.i("TAG", "onTaskReady " + tag);
+    public void onTaskReady(BaseTask task) {
+        Log.i("TAG", "onTaskReady " + task.getTag());
     }
 
     @Override
-    public void onTaskProgressUpdate(Object tag, Object... progress) {
-        Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
+    public void onTaskProgressUpdate(BaseTask task, Object... progress) {
+        Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
     }
 
     @Override
@@ -66,11 +66,8 @@ public class TestChainView extends Button implements IBgTaskCallbacks {
                 if(BgTasks.isTaskInProgress(TestChainView.this,MainActivity.CHAINTAG)){
                     BgTasks.cancelTask(TestChainView.this,MainActivity.CHAINTAG);
                 }else{
-                    TaskChain chain=new TaskChain(MainActivity.CHAINTAG);
-                    chain.addTask(new TestTask());
-                    chain.addTask(new TestTask());
-                    chain.addTask(new TestTask());
-                    BgTasks.startTaskChain(TestChainView.this, chain);
+                    new BgTaskChain(TestChainView.this).addTask(MainActivity.CHAINTAG, new TestTask()).addTask(MainActivity.CHAINTAG,
+                            new TestTask()).addTask(MainActivity.CHAINTAG, new TestTask()).run();
                 }
             }
         });

@@ -8,18 +8,18 @@ public interface IBgTaskCallbacks extends IBgTaskSimpleCallbacks{
     /**
      * Triggered when the task is ready to execute
      *
-     * @param tag task's tag
+     * @param task task's tag
      */
-    void onTaskReady(Object tag);
+    void onTaskReady(BaseTask task);
 
     /**
      * Triggered when the task publishes progress. In case of TaskChain, this is triggered, when partial tasks
      * are completed with result as progress.
      *
-     * @param tag      task or chain tag
+     * @param task      task or chain
      * @param progress published progress
      */
-    void onTaskProgressUpdate(Object tag, Object... progress);
+    void onTaskProgressUpdate(BaseTask task, Object... progress);
 
     /**
      * Triggered when the task or chain has been cancelled

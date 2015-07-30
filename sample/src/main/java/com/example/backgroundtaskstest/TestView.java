@@ -29,15 +29,14 @@ public class TestView extends Button implements IBgTaskCallbacks {
         super(context, attrs, defStyleAttr);
         init();
     }
-
     @Override
-    public void onTaskReady(Object tag) {
-        Log.i("TAG", "onTaskReady " + tag);
+    public void onTaskReady(BaseTask task) {
+        Log.i("TAG", "onTaskReady " + task.getTag());
     }
 
     @Override
-    public void onTaskProgressUpdate(Object tag, Object... progress) {
-        Log.i("TAG","onTaskProgress "+tag+"   "+progress[0]);
+    public void onTaskProgressUpdate(BaseTask task, Object... progress) {
+        Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
     }
 
     @Override

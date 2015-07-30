@@ -5,6 +5,8 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.app.Fragment;
 
+import com.github.slezadav.backgroundTasks.executor.ParallelExecutor;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
@@ -40,12 +42,12 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     private CallbackType mCallbackType;
 
 
-    protected CallbackType getCallbackType(){
+    protected CallbackType getCallbackType() {
         return mCallbackType;
     }
 
-    protected void setCallbackType(CallbackType type){
-        this.mCallbackType=type;
+    protected void setCallbackType(CallbackType type) {
+        this.mCallbackType = type;
     }
 
     /**
@@ -77,6 +79,29 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     private Executor mExecutor;
 
     /**
+     * Task to be started after this one
+     */
+    private BaseTask followingTask;
+
+    /**
+     * Sets the task following after this one
+     * @param followingTask task to follow
+     */
+    protected BaseTask addFollowingTask(Object tag, BaseTask followingTask) {
+        this.followingTask = followingTask;
+        followingTask.setTag(tag);
+        return followingTask;
+    }
+
+    /**
+     * Gets the following task
+     * @return the following task
+     */
+    public BaseTask getFollowingTask() {
+        return followingTask;
+    }
+
+    /**
      * Sets the callbacks for this task
      *
      * @param clb Callbacks to be used with this task
@@ -88,12 +113,13 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 
     /**
      * Method to get this task's callbacks
+     *
      * @return task's callbacks
      */
-    protected IBgTaskSimpleCallbacks getCallbacks(){
-        if(mCallbacks!=null){
+    protected IBgTaskSimpleCallbacks getCallbacks() {
+        if (mCallbacks != null) {
             return mCallbacks.get();
-        }else{
+        } else {
             return null;
         }
     }
@@ -123,18 +149,10 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     protected Executor getExecutor() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-            return mExecutor != null ? mExecutor : THREAD_POOL_EXECUTOR;
+            return mExecutor != null ? mExecutor : ParallelExecutor.getExecutorInstance();
         } else {
             return null;
         }
-    }
-
-    /**
-     * Returns true if task has custom executor
-     * @return
-     */
-    protected boolean hasCustomExecutor(){
-        return mExecutor != null;
     }
 
     /**
@@ -151,20 +169,17 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return executeOnExecutor(getExecutor(), params);
         } else {
             try {
-                if(mExecutor!=null){
-                    Field ex = AsyncTask.class.getDeclaredField("sExecutor");
-                    ex.setAccessible(true);
-                    ex.set(this,mExecutor);
-                }
+                Field ex = AsyncTask.class.getDeclaredField("sExecutor");
+                ex.setAccessible(true);
+                ex.set(this, getExecutor());
                 execute(params);
                 return this;
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
         }
     }
-
 
 
     /**
@@ -200,7 +215,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && fullCallBacks) {
-            mEnclosingFragment.get().handlePreExecute((IBgTaskCallbacks) mCallbacks.get(), getTag());
+            mEnclosingFragment.get().handlePreExecute((IBgTaskCallbacks) mCallbacks.get(), this);
         }
     }
 
@@ -211,7 +226,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && fullCallBacks) {
-            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), getTag(),
+            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), this,
                     (Object[]) progress);
         }
     }
@@ -247,7 +262,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && !isCancelled()) {
-            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(),this, result);
+            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(), this, result);
         } else if (mEnclosingFragment.get() != null && !isCancelled()) {
             mEnclosingFragment.get().onUnresolvedResult(this, result);
         }
@@ -278,7 +293,8 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         return callbacksValid && taskFragmentValid && !detached;
     }
 
-    protected enum CallbackType{
-        ACTIVITY,FRAGMENT,VIEW
+    protected enum CallbackType {
+        ACTIVITY, FRAGMENT, VIEW
     }
+
 }

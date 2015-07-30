@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.View;
 
 import com.github.slezadav.backgroundTasks.BaseTask.CallbackType;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 
 /**
@@ -39,10 +37,6 @@ public class TaskFragment extends Fragment {
      * Map of results which could not yet be returned
      */
     private HashMap<BaseTask, Object> mUnresolvedResults = new HashMap<>();
-    /**
-     * Map of task that are contained in chains and will run in the future
-     */
-    private HashMap<Object, FutureTask> mChainedTasks = new HashMap<>();
 
     /**
      * This method will only be called once when the retained Fragment is first created.
@@ -139,11 +133,11 @@ public class TaskFragment extends Fragment {
      */
     @Nullable
     private ArrayList<BaseTask> getTaskByTag(Object tag) {
-        ArrayList<BaseTask> tasks=null;
+        ArrayList<BaseTask> tasks = null;
         for (BaseTask task : mTasks.keySet()) {
             if (task.getTag().equals(tag)) {
-                if(tasks==null){
-                    tasks=new ArrayList<>();
+                if (tasks == null) {
+                    tasks = new ArrayList<>();
                 }
                 tasks.add(task);
             }
@@ -155,12 +149,10 @@ public class TaskFragment extends Fragment {
      * Finds out if the task is in progress
      *
      * @param tag            tag of the task
-     * @param considerChains considerChains as tasks for this purpose
      * @return true if the task is in progress
      */
-    protected boolean isTaskInProgress(Object tag, boolean considerChains) {
-        boolean singleTask = getTaskByTag(tag) != null;
-        return singleTask || (considerChains && isChainInProgress(tag));
+    protected boolean isTaskInProgress(Object tag) {
+        return getTaskByTag(tag) != null;
     }
 
     /**
@@ -171,12 +163,11 @@ public class TaskFragment extends Fragment {
     protected void cancelTask(Object tag) {
         ArrayList<BaseTask> tasks = getTaskByTag(tag);
         if (tasks != null) {
-            for(BaseTask task:tasks){
+            for (BaseTask task : tasks) {
                 task.cancel(true);
                 mTasks.remove(task);
             }
         }
-        cancelChain(tag);
     }
 
     /**
@@ -200,16 +191,6 @@ public class TaskFragment extends Fragment {
      * @param params params for the task
      */
     protected void prepareTask(Object tag, BaseTask task, Object... params) {
-        if (isTaskInProgress(tag, false)) {
-            Log.w(TAG, "Another instance of " + tag.toString() +
-                       " already in progress");
-
-            if(!task.hasCustomExecutor()){
-                Log.i("TAG","***");
-                task.setExecutor(getTaskByTag(tag).get(0).getExecutor());
-            }
-          //  return;
-        }
         task.setTag(tag);
         task.setEnclosingFragment(this);
         reassignCallbacks(task);
@@ -222,22 +203,25 @@ public class TaskFragment extends Fragment {
     /**
      * Removes the task from the list of tasks
      *
-     * @param tag task to be removed
+     * @param task task to be removed
      */
-    protected void completeTask(Object tag) {
-        for (BaseTask task : mTasks.keySet()) {
-            if (task.getTag().equals(tag)) {
+    protected void completeTask(BaseTask task) {
+        for (BaseTask t : mTasks.keySet()) {
+            if (t.equals(task)) {
                 mTasks.remove(task);
                 break;
             }
         }
     }
 
-
+    /**
+     * Reassigns callbacks to task
+     * @param task task whose callbacks are to be reassigned
+     */
     private void reassignCallbacks(BaseTask task) {
         Object callbackId = task.getCallbacksId();
         IBgTaskSimpleCallbacks callbacks = null;
-        if (task.getCallbackType() == CallbackType.FRAGMENT && callbackId != null&& getActivity() != null) {
+        if (task.getCallbackType() == CallbackType.FRAGMENT && callbackId != null && getActivity() != null) {
             callbacks = findFragmentByTagOrId(callbackId);
         } else if (task.getCallbackType() == CallbackType.ACTIVITY && getActivity() != null) {
             callbacks = (IBgTaskSimpleCallbacks) getActivity();
@@ -283,56 +267,41 @@ public class TaskFragment extends Fragment {
      */
     protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, BaseTask task, Object result) {
         if (callbacks != null) {
-            if (isTaskChained(task.getTag())) {
-                if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                    BaseTask failingTag = removeChainResidue(task.getTag());
-                    callbacks.onTaskFail(failingTag, (Exception) result);
-                } else {
-                    if (callbacks instanceof IBgTaskCallbacks) {
-                        ((IBgTaskCallbacks) callbacks).onTaskProgressUpdate(getChainFinalTag(task.getTag()), result);
-                    }
-                    continueChain(task.getTag(), result);
-                }
-            } else {
                 if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
                     callbacks.onTaskFail(task, (Exception) result);
                 } else {
                     callbacks.onTaskSuccess(task, result);
+                    if(task.getFollowingTask()!=null){
+                        BgTasks.startFollowingTask(callbacks,task.getFollowingTask().getTag(),task.getFollowingTask(),result);
+                    }
                 }
-            }
-            completeTask(task.getTag());
+            completeTask(task);
         }
-
     }
 
     /**
      * Handles the progress publishing of the task
      *
      * @param callbacks callback where to publish
-     * @param tag       task tag
+     * @param task      task
      * @param progress  progress published by the task
      */
-    protected void handleProgress(IBgTaskCallbacks callbacks, Object tag, Object... progress) {
+    protected void handleProgress(IBgTaskCallbacks callbacks, BaseTask task, Object... progress) {
         if (callbacks == null) {
             return;
         }
-        if (isTaskChained(tag)) {
-
-            callbacks.onTaskProgressUpdate(getChainFinalTag(tag), (Object[]) progress);
-        } else {
-            callbacks.onTaskProgressUpdate(tag, (Object[]) progress);
-        }
+        callbacks.onTaskProgressUpdate(task, (Object[]) progress);
     }
 
     /**
      * Handles the pre execution of the tag
      *
      * @param callbacks callback where to return
-     * @param tag       task tag
+     * @param task      task
      */
-    protected void handlePreExecute(IBgTaskCallbacks callbacks, Object tag) {
-        if (callbacks != null && !isTaskChained(tag) && !isChainInProgress(tag)) {
-            callbacks.onTaskReady(tag);
+    protected void handlePreExecute(IBgTaskCallbacks callbacks,BaseTask task) {
+        if (callbacks != null) {
+            callbacks.onTaskReady(task);
         }
     }
 
@@ -343,135 +312,9 @@ public class TaskFragment extends Fragment {
      * @param tag       tag task
      */
     protected void handleCancel(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
-        if (isTaskChained(tag)) {
-            tag = removeChainResidue(tag).getTag();
-
-        } else {
-            cancelTask(tag);
-        }
+        cancelTask(tag);
         if (callbacks != null && callbacks instanceof IBgTaskCallbacks) {
             ((IBgTaskCallbacks) callbacks).onTaskCancelled(tag, result);
         }
     }
-
-    /**
-     * Starts task chain
-     *
-     * @param chain chain to be started
-     */
-    protected void startTaskChain(TaskChain chain) {
-        if (isChainInProgress(chain.finalTag)) {
-            Log.w(TAG, "Another instance of " + chain.finalTag.toString() +
-                       " already in progress");
-            return;
-        }
-        ArrayList<Object> tags = new ArrayList<>();
-        for (int i = 0; i < chain.tasks.size() - 1; i++) {
-            String chaintag = UUID.randomUUID().toString();
-            tags.add(chaintag);
-        }
-        tags.add(chain.finalTag);
-        for (int i = 1; i < chain.tasks.size(); i++) {
-            FutureTask ft = new FutureTask(tags.get(i), chain.tasks.get(i), chain.useHistoryParam.get(i),
-                    chain.params.get(i));
-            mChainedTasks.put(tags.get(i - 1), ft);
-        }
-        startTask(tags.get(0), chain.tasks.get(0), (Object[]) chain.params.get(0));
-    }
-
-    /**
-     * Continues chain by the last used tag
-     *
-     * @param finishedTag finished partial task tag
-     * @param result      result of just finished partial task
-     */
-    private void continueChain(Object finishedTag, Object result) {
-        FutureTask ft = mChainedTasks.get(finishedTag);
-        if (ft.useHistoryParam) {
-            ft.params.add(result);
-        }
-        startTask(ft.tag, ft.task, (Object[]) ft.getParams());
-        mChainedTasks.remove(finishedTag);
-    }
-
-    /**
-     * Cancels chain in progress
-     *
-     * @param finalTag tag of the chain to cancel
-     */
-    private void cancelChain(Object finalTag) {
-        for (Map.Entry<Object, FutureTask> ft : mChainedTasks.entrySet()) {
-            FutureTask task = ft.getValue();
-            if (task.tag.equals(finalTag)) {
-                if (isTaskInProgress(ft.getKey(), false)) {
-                    cancelTask(ft.getKey());
-                }
-                cancelChain(ft.getKey());
-                return;
-            }
-        }
-    }
-
-    /**
-     * Returns whether the task is chained
-     *
-     * @param tag tag to be checked
-     * @return true if the tag belongs to the task in chain
-     */
-    private boolean isTaskChained(Object tag) {
-        return mChainedTasks.containsKey(tag);
-    }
-
-    /**
-     * Removes the residues of the chain after fail or cancellation
-     *
-     * @param failingTag tag of the task which failed
-     * @return Chain's final tag
-     */
-    protected BaseTask removeChainResidue(Object failingTag) {
-        FutureTask ft;
-        BaseTask failingTask=null;
-        while (mChainedTasks.containsKey(failingTag)) {
-            ft = mChainedTasks.get(failingTag);
-            mChainedTasks.remove(failingTag);
-            failingTag = ft.tag;
-            failingTask=ft.task;
-            failingTask.setTag(failingTag);
-        }
-        return failingTask;
-    }
-
-    /**
-     * Gets the chain's final tag from any of its partial tags
-     *
-     * @param partialTag partial tag of the chain
-     * @return Chain's final tag
-     */
-    private Object getChainFinalTag(Object partialTag) {
-        Object finalTag = null;
-        FutureTask ft;
-        while (mChainedTasks.containsKey(partialTag)) {
-            ft = mChainedTasks.get(partialTag);
-            partialTag = ft.tag;
-            finalTag = partialTag;
-        }
-        return finalTag;
-    }
-
-    /**
-     * Returns whether the chain is in progress
-     *
-     * @param tag Chain's tag
-     * @return true if chain is in progress
-     */
-    protected boolean isChainInProgress(Object tag) {
-        for (FutureTask ft : mChainedTasks.values()) {
-            if (ft.tag.equals(tag)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
 }
