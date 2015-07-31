@@ -38,14 +38,23 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     private Object mCallbacksId;
 
-
+    /**
+     * Callback type
+     */
     private CallbackType mCallbackType;
 
-
+    /**
+     * Gets callback type
+     * @return clb type
+     */
     protected CallbackType getCallbackType() {
         return mCallbackType;
     }
 
+    /**
+     * Sets the callback type
+     * @param type type of callback
+     */
     protected void setCallbackType(CallbackType type) {
         this.mCallbackType = type;
     }
