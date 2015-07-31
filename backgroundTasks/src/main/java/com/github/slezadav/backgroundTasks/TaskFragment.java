@@ -148,7 +148,7 @@ public class TaskFragment extends Fragment {
     /**
      * Finds out if the task is in progress
      *
-     * @param tag            tag of the task
+     * @param tag tag of the task
      * @return true if the task is in progress
      */
     protected boolean isTaskInProgress(Object tag) {
@@ -216,6 +216,7 @@ public class TaskFragment extends Fragment {
 
     /**
      * Reassigns callbacks to task
+     *
      * @param task task whose callbacks are to be reassigned
      */
     private void reassignCallbacks(BaseTask task) {
@@ -267,14 +268,15 @@ public class TaskFragment extends Fragment {
      */
     protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, BaseTask task, Object result) {
         if (callbacks != null) {
-                if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                    callbacks.onTaskFail(task, (Exception) result);
-                } else {
-                    callbacks.onTaskSuccess(task, result);
-                    if(task.getFollowingTask()!=null){
-                        BgTasks.startFollowingTask(callbacks,task.getFollowingTask().getTag(),task.getFollowingTask(),result);
-                    }
+            if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
+                callbacks.onTaskFail(task, (Exception) result);
+            } else {
+                callbacks.onTaskSuccess(task, result);
+                if (task.getFollowingTask() != null) {
+                    BgTasks.startFollowingTask(callbacks, task.getFollowingTask().getTag(),
+                            task.getFollowingTask(), result);
                 }
+            }
             completeTask(task);
         }
     }
@@ -299,7 +301,7 @@ public class TaskFragment extends Fragment {
      * @param callbacks callback where to return
      * @param task      task
      */
-    protected void handlePreExecute(IBgTaskCallbacks callbacks,BaseTask task) {
+    protected void handlePreExecute(IBgTaskCallbacks callbacks, BaseTask task) {
         if (callbacks != null) {
             callbacks.onTaskReady(task);
         }
@@ -309,12 +311,11 @@ public class TaskFragment extends Fragment {
      * Handles the cancellation of the task
      *
      * @param callbacks callbacks where to notify cancellation
-     * @param tag       tag task
+     * @param task      task
      */
-    protected void handleCancel(IBgTaskSimpleCallbacks callbacks, Object tag, Object result) {
-        cancelTask(tag);
+    protected void handleCancel(IBgTaskSimpleCallbacks callbacks, BaseTask task, Object result) {
         if (callbacks != null && callbacks instanceof IBgTaskCallbacks) {
-            ((IBgTaskCallbacks) callbacks).onTaskCancelled(tag, result);
+            ((IBgTaskCallbacks) callbacks).onTaskCancelled(task, result);
         }
     }
 }

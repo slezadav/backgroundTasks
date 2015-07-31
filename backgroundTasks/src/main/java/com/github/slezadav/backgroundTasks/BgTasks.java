@@ -118,8 +118,6 @@ public class BgTasks {
         startTask(view, tag, task, params);
     }
 
-
-
     /**
      * Method that cancels the execution of the task with given tag
      *

@@ -38,7 +38,7 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
             @Override
             public void onClick(View v) {
                 new BgTaskChain(TestFragment.this).addTask(CHAINTAG, new TestTask()).addTask(CHAINTAG,
-                        new TestTask()).addTask(CHAINTAG, new TestTask()).run();
+                        new TestTask()).run();
             }
         });
         mRoot.findViewById(R.id.button_cancel_taskf).setOnClickListener(new OnClickListener() {
@@ -65,10 +65,9 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
         Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
     }
-
     @Override
-    public void onTaskCancelled(Object tag, Object result) {
-        Log.i("TAG","onTaskCancel "+tag+"    "+result);
+    public void onTaskCancelled(BaseTask task, Object result) {
+        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
     }
 
     @Override

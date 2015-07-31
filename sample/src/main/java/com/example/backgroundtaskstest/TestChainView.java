@@ -40,10 +40,9 @@ public class TestChainView extends Button implements IBgTaskCallbacks {
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
         Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
     }
-
     @Override
-    public void onTaskCancelled(Object tag, Object result) {
-        Log.i("TAG","onTaskCancel "+tag+"    "+result);
+    public void onTaskCancelled(BaseTask task, Object result) {
+        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
     }
 
     @Override
@@ -67,7 +66,7 @@ public class TestChainView extends Button implements IBgTaskCallbacks {
                     BgTasks.cancelTask(TestChainView.this,MainActivity.CHAINTAG);
                 }else{
                     new BgTaskChain(TestChainView.this).addTask(MainActivity.CHAINTAG, new TestTask()).addTask(MainActivity.CHAINTAG,
-                            new TestTask()).addTask(MainActivity.CHAINTAG, new TestTask()).run();
+                            new TestTask()).run();
                 }
             }
         });

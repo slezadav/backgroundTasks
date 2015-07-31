@@ -247,7 +247,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
                 return;
             }
             if (canUseCallbacks()) {
-                mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag(), result);
+                mEnclosingFragment.get().handleCancel(mCallbacks.get(), this, result);
             }
         }
 
@@ -260,7 +260,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
                 return;
             }
             if (canUseCallbacks()) {
-                mEnclosingFragment.get().handleCancel(mCallbacks.get(), getTag(), null);
+                mEnclosingFragment.get().handleCancel(mCallbacks.get(), this, null);
             }
         }
     }

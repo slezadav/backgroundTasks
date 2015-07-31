@@ -40,8 +40,8 @@ public class TestView extends Button implements IBgTaskCallbacks {
     }
 
     @Override
-    public void onTaskCancelled(Object tag, Object result) {
-        Log.i("TAG","onTaskCancel "+tag+"    "+result);
+    public void onTaskCancelled(BaseTask task, Object result) {
+        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
     }
 
     @Override

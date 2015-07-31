@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.github.slezadav.backgroundTasks.BaseTask;
-import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.BgTaskChain;
+import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 
 
@@ -25,7 +25,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
         task.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.startTask(MainActivity.this, TASKTAG, new TestTask());
+                BgTasks.startTask(MainActivity.this, TASKTAG,new TestTask());
             }
         });
         Button chain = (Button) findViewById(R.id.button_chain);
@@ -33,7 +33,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
             @Override
             public void onClick(View v) {
                 new BgTaskChain(MainActivity.this).addTask(CHAINTAG, new TestTask()).addTask(CHAINTAG,
-                        new TestTask()).addTask(CHAINTAG, new TestTask()).run();
+                        new TestTask()).run();
             }
         });
         Button cchain = (Button) findViewById(R.id.button_cancel_chain);
@@ -50,8 +50,6 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
                 BgTasks.cancelTask(MainActivity.this, TASKTAG);
             }
         });
-
-
     }
 
 
@@ -62,13 +60,13 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
-        Log.i("TAG", "onTaskProgress " + task.getClass().getSimpleName() + "    " + task.getTag() + "   " +
+        Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
                      progress[0]);
     }
 
     @Override
-    public void onTaskCancelled(Object tag, Object result) {
-        Log.i("TAG", "onTaskCancel " + tag + "   " + result);
+    public void onTaskCancelled(BaseTask task, Object result) {
+        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
     }
 
     @Override
