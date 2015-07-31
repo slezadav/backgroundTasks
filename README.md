@@ -32,13 +32,13 @@ As with AsyncTask you can you can use methods like `publishProgress(Object objec
 #Task callbacks
 In order to start a task your `Activity` , `Fragment` or `View` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
 
-* `onTaskReady(Object tag)` - called after `onPreExecute()` of the task was completed
+* `onTaskReady(BaseTask task)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
 * `onTaskCancelled(Object tag,Object result)` - called after the task has been cancelled 
-* `onTaskSuccess(Object tag, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
-* `onTaskFail(Object tag, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
+* `onTaskSuccess(BaseTask task, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
+* `onTaskFail(BaseTask task, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
 
-If you use `IBgTaskSimpleCallbacks` only `onTaskSuccess(Object tag, Object result)` and `onTaskFail(Object tag, Exception exception)` are in use.
+If you use `IBgTaskSimpleCallbacks` only `onTaskSuccess(BaseTask task, Object result)` and `onTaskFail(BaseTask task, Exception exception)` are in use.
 
 These callbacks will be delivered even if orientation change occurs. In case the task should deliver the callback in the exact moment when the activity is recreated, it will be delivered during `onResume()` lifecycle call.
 These callbacks are kept as `WeakReference`s and reassigned whenever the activity or fragment is recreated so the leaks should never occur.
@@ -67,13 +67,13 @@ public static final String TASKTAG="my_task";
  }
  
  @Override
- public void onTaskSuccess(Object tag, Object result) {
-    Log.i("TAG","onTaskSuccess "+tag+"   "+result);
+ public void onTaskSuccess(BaseTask task, Object result) {
+    Log.i("TAG","onTaskSuccess "+task.getTag()+"   "+result);
  }
 
  @Override
- public void onTaskFail(Object tag, Exception exception) {
-    Log.i("TAG","onTaskFail "+tag);
+ public void onTaskFail(BaseTask task, Exception exception) {
+    Log.i("TAG","onTaskFail "+task.getTag());
  }
 }
 ```
@@ -88,36 +88,16 @@ It is also possible to use custom executor by using :
 BgTasks.startTask(activity/*(fragment,view)*/,executor,tag,task,params);
 ```
 
+or provided serial and parallel executors by `SerialExecutor.getExecutorInstance()` and `ParallelExecutor.getExecutorInstance()`
+
 # Task chains
-A `TaskChain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. It consists of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
-Example of constructing a chain where second task uses the firs task's results :
+A `Chain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. It consists of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
+Example of constructing and starting a chain:
 ```java
-TaskChain chain=new TaskChain(MY_CHAIN_TAG);
-chain.addTask(new FirstTask());
-chain.addTask(new SecondTask(),true);
-chain.addTask(new ThirdTask());
-BgTasks.startTaskChain(this,chain);
+new BgTaskChain(MainActivity.this)
+.addTask(CHAINTAG, new TestTask())
+.addTask(CHAINTAG,new TestTask())
+.addTask(CHAINTAG, new TestTask())
+.run();
 ```
-Note: If the task has its own params, the results of the previous tasks are appended to the end of param array.
-
-Chain usage has the same rules as using simple tasks described before.There are some differences however:
-
-* `TaskChain` has a single tag that propagates to callbacks
-* `TaskChain` will never trigger `onTaskReady(Object tag)`
-* `TaskChain` will trigger `onTaskProgressUpdate(Object tag,Object.. progress)` whenever any task in chain calls `publishProgress(Progress... progress)` and when any of the tasks in this chain finishes.
-* `TaskChain` can be cancelled the same way as simple task `BgTasks.cancelTask(activity/*or fragment*/,tag);`
-* `TaskChain` will trigger `onTaskCancelled(Object tag,Object result)` when it is cancelled
-* `TaskChain` triggers `onTaskSuccess(Object tag, Object result)` when all tasks in chain finished successfully.
-* `TaskChain` triggers `onTaskFail(Object tag, Exception exception)` when any task in chain throws exception.
-
-
-Simple example of starting `TaskChain` from activity or fragment:
-```java
-TaskChain chain=new TaskChain(MY_CHAIN_TAG);
-chain.addTask(new FirstTask());
-chain.addTask(new SecondTask(),true);
-chain.addTask(new ThirdTask());
-BgTasks.startTaskChain(this,chain);
-```
-
 
