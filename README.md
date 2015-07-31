@@ -34,7 +34,7 @@ In order to start a task your `Activity` , `Fragment` or `View` must implement `
 
 * `onTaskReady(BaseTask task)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
-* `onTaskCancelled(Object tag,Object result)` - called after the task has been cancelled 
+* `onTaskCancelled(BaseTask task,Object result)` - called after the task has been cancelled 
 * `onTaskSuccess(BaseTask task, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
 * `onTaskFail(BaseTask task, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
 
