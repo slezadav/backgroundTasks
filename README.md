@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.3.1'
+    compile 'com.github.slezadav:backgroundTasks:1.4.1'
 }
 ```
 
@@ -34,7 +34,7 @@ In order to start a task your `Activity` , `Fragment` or `View` must implement `
 
 * `onTaskReady(BaseTask task)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
-* `onTaskCancelled(Object tag,Object result)` - called after the task has been cancelled 
+* `onTaskCancelled(BaseTask task,Object result)` - called after the task has been cancelled 
 * `onTaskSuccess(BaseTask task, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
 * `onTaskFail(BaseTask task, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
 
