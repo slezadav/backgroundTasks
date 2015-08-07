@@ -33,33 +33,44 @@ public class TestView extends Button implements IBgTaskCallbacks {
     @Override
     public void onTaskReady(BaseTask task) {
         Log.i("TAG", "onTaskReady " + task.getTag());
-        Log.i("TAG", "onTaskReady " + task.getChainTag());
+        if(task.getChainTag()!=null){
+            Log.i("TAG", "onTaskReady " + task.getChainTag());
+        }
+
     }
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
         Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
                      progress[0]);
-        Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
-                     progress[0]);
+        if(task.getChainTag()!=null) {
+            Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
+                         progress[0]);
+        }
     }
 
     @Override
     public void onTaskCancelled(BaseTask task, Object result) {
         Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
-        Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
+        if(task.getChainTag()!=null) {
+            Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
+        }
     }
 
     @Override
     public void onTaskSuccess(BaseTask task, Object result) {
         Log.i("TAG", "onTaskSuccess " + task.getTag() + "   " + result);
-        Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
+        if(task.getChainTag()!=null) {
+            Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
+        }
     }
 
     @Override
     public void onTaskFail(BaseTask task, Exception exception) {
         Log.i("TAG", "onTaskFail " + task.getTag());
-        Log.i("TAG", "onTaskFail " + task.getChainTag());
+        if(task.getChainTag()!=null) {
+            Log.i("TAG", "onTaskFail " + task.getChainTag());
+        }
     }
 
     private void init(){

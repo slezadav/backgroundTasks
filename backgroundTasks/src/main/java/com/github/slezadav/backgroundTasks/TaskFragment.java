@@ -134,7 +134,7 @@ public class TaskFragment extends Fragment {
     private ArrayList<BaseTask> getTaskByTag(String tag) {
         ArrayList<BaseTask> tasks = null;
         for (BaseTask task : mTasks.keySet()) {
-            if (tag!=null&&task.getTag().equals(tag)) {
+            if (tag!=null&&task.readTag().equals(tag)) {
                 if (tasks == null) {
                     tasks = new ArrayList<>();
                 }
@@ -154,7 +154,7 @@ public class TaskFragment extends Fragment {
     private ArrayList<BaseTask> getTaskByChainTag(String tag) {
         ArrayList<BaseTask> tasks = null;
         for (BaseTask task : mTasks.keySet()) {
-            if (tag!=null&&tag.equals(task.getChainTag())) {
+            if (tag!=null&&tag.equals(task.readChainTag())) {
                 if (tasks == null) {
                     tasks = new ArrayList<>();
                 }

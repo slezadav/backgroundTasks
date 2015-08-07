@@ -128,12 +128,16 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return the following task
      */
-    public BaseTask getFollowingTask() {
+    protected BaseTask getFollowingTask() {
         return followingTask;
     }
 
 
-    public String getChainTag() {
+    protected String readChainTag() {
+        return mChainTag;
+    }
+
+    public String getChainTag(){
         return mChainTag;
     }
 
@@ -181,9 +185,14 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return this task's tag
      */
-    public String getTag() {
+    protected String readTag() {
         return mTag;
     }
+
+    public String getTag(){
+        return mTag;
+    }
+
 
     /**
      * Gets the tasks's executor
