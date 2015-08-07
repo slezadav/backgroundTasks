@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.4.1'
+    compile 'com.github.slezadav:backgroundTasks:1.5.0'
 }
 ```
 
@@ -33,7 +33,7 @@ As with AsyncTask you can you can use methods like `publishProgress(Object objec
 In order to start a task your `Activity` , `Fragment` or `View` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
 
 * `onTaskReady(BaseTask task)` - called after `onPreExecute()` of the task was completed
-* `onTaskProgressUpdate(Object tag,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
+* `onTaskProgressUpdate(BaseTask task,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
 * `onTaskCancelled(BaseTask task,Object result)` - called after the task has been cancelled 
 * `onTaskSuccess(BaseTask task, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
 * `onTaskFail(BaseTask task, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
@@ -48,9 +48,14 @@ These callbacks are kept as `WeakReference`s and reassigned whenever the activit
 Tasks are started via static methods in `BgTasks` class by calling:
 
 ```java
-BgTasks.startTask(activity/*(fragment,view)*/,tag,task,params)
+BgTasks.startTask(activity/*(fragment,view)*/,task,params)
 ```
-The `tag` parameter in the call accepts an arbitrary object which is then used to uniquely identify the task. Note that it is not possible to have more tasks with the same tag running at once in the same activity or fragment.
+or
+
+```java
+BgTasks.startTask(activity/*(fragment,view)*/,task.withTag(tag),params)
+```
+The `tag` parameter in the call accepts a String which is then used to identify the task.
 
 Last parameter is a varargs used for parameters to the task.It works the same way as in AsyncTask's execute. It is also possible to pass the params to the task before it is started (constructor,setters).
 
@@ -63,7 +68,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskSimpleCallb
 public static final String TASKTAG="my_task";
 
  private void start(){
-     BgTasks.startTask(this, TASKTAG, new MyTask());
+     BgTasks.startTask(this,new MyTask().withTag(TASKTAG));
  }
  
  @Override
@@ -85,7 +90,7 @@ BgTasks.cancelTask(activity/*(fragment,view)*/,tag);
 
 It is also possible to use custom executor by using :
 ```java
-BgTasks.startTask(activity/*(fragment,view)*/,executor,tag,task,params);
+BgTasks.startTask(activity/*(fragment,view)*/,executor,task,params);
 ```
 
 or provided serial and parallel executors by `SerialExecutor.getExecutorInstance()` and `ParallelExecutor.getExecutorInstance()`
@@ -94,10 +99,12 @@ or provided serial and parallel executors by `SerialExecutor.getExecutorInstance
 A `Chain` is a mechanism, taht allows you to start multiple tasks, taht will be processed sequentially. It consists of one or more tasks. For these tasks there are same rules as described before. Every task in chain (except the first one) can use the results of a previous task as its parameters.
 Example of constructing and starting a chain:
 ```java
-new BgTaskChain(MainActivity.this)
-.addTask(CHAINTAG, new TestTask())
-.addTask(CHAINTAG,new TestTask())
-.addTask(CHAINTAG, new TestTask())
-.run();
+BgTasks.startTask(MainActivity.this,new BgTaskChain().addTask(new TestTask()).addTask(new TestTask()));
 ```
+you can also use tags with chains as follows
+
+```java
+BgTasks.startTask(MainActivity.this,new BgTaskChain().addTask(new TestTask().withTag(TASKTAG)).addTask(new TestTask()).withTag(CHAINTAG));
+```
+Here the chain itself and the first task were given custom tags, whereas the second tag was not.
 
