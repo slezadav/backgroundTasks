@@ -17,23 +17,24 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
     public static final String TASKTAG = "task";
     public static final String CHAINTAG = "chain";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button task = (Button) findViewById(R.id.button_task);
-        task.setOnClickListener(new View.OnClickListener() {
+        Button taskb = (Button) findViewById(R.id.button_task);
+        taskb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.startTask(MainActivity.this, TASKTAG,new TestTask());
+                BgTasks.startTask(MainActivity.this,new TestTask().withTag(TASKTAG));
             }
         });
-        Button chain = (Button) findViewById(R.id.button_chain);
-        chain.setOnClickListener(new View.OnClickListener() {
+        Button chainb = (Button) findViewById(R.id.button_chain);
+        chainb.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                new BgTaskChain(MainActivity.this).addTask(CHAINTAG, new TestTask()).addTask(CHAINTAG,
-                        new TestTask()).run();
+            public void onClick(View v) {                ;
+                BgTasks.startTask(MainActivity.this,new BgTaskChain().addTask(new TestTask().withTag(TASKTAG)).addTask(
+                        new TestTask()).withTag(CHAINTAG));
             }
         });
         Button cchain = (Button) findViewById(R.id.button_cancel_chain);
@@ -47,35 +48,42 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
         ctask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.cancelTask(MainActivity.this, TASKTAG);
+                BgTasks.cancelTask(MainActivity.this,TASKTAG);
             }
         });
     }
 
 
+
     @Override
     public void onTaskReady(BaseTask task) {
         Log.i("TAG", "onTaskReady " + task.getTag());
+        Log.i("TAG", "onTaskReady " + task.getChainTag());
     }
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
         Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
                      progress[0]);
+        Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
+                     progress[0]);
     }
 
     @Override
     public void onTaskCancelled(BaseTask task, Object result) {
         Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
+        Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
     }
 
     @Override
     public void onTaskSuccess(BaseTask task, Object result) {
         Log.i("TAG", "onTaskSuccess " + task.getTag() + "   " + result);
+        Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
     }
 
     @Override
     public void onTaskFail(BaseTask task, Exception exception) {
         Log.i("TAG", "onTaskFail " + task.getTag());
+        Log.i("TAG", "onTaskFail " + task.getChainTag());
     }
 }

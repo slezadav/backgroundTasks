@@ -20,16 +20,15 @@ public class BgTasks {
      * Method that starts the task from activity
      *
      * @param activity activity to which the callbacks should be delivered
-     * @param tag      tag by which the task is identified
      * @param task     task to be started
      * @param params   optional params for the task
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
-    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity, Object tag,
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity,
                                                                                        BaseTask task, Object...
                                                                                                params) {
         task.setCallbackType(CallbackType.ACTIVITY);
-        getFragment(activity).startTask(tag, task, params);
+        getFragment(activity).startTask(task, params);
     }
 
 
@@ -37,35 +36,33 @@ public class BgTasks {
      * Method that starts the task from fragment
      *
      * @param fragment fragment to which the callbacks should be delivered
-     * @param tag      tag by which the task is identified
      * @param task     task to be started
      * @param params   optional params for the task
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
-    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment, Object tag, BaseTask
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment,BaseTask
             task, Object... params) {
         Object id = getIdTagOrIdFromFragment(fragment);
         task.setCallbacksId(id);
         task.setCallbackType(CallbackType.FRAGMENT);
-        getFragment(fragment).startTask(tag, task, params);
+        getFragment(fragment).startTask(task, params);
     }
 
     /**
      * Method that starts the task from view
      *
      * @param view   view in which to return callbacks
-     * @param tag    tag by which the task is identified
      * @param task   task to be started
      * @param params optional params for the task
      * @param <T>    Must extend View implement IBgTaskCallbacks
      */
     @SuppressWarnings("unchecked")
-    public static <T extends View & IBgTaskSimpleCallbacks> void startTask(T view, Object tag, BaseTask task,
+    public static <T extends View & IBgTaskSimpleCallbacks> void startTask(T view,  BaseTask task,
                                                                            Object... params) {
         task.setCallbackType(CallbackType.VIEW);
         Object id = getIdTagOrIdFromView(view);
         task.setCallbacksId(id);
-        getFragment(view).startTask(tag, task, params);
+        getFragment(view).startTask(task, params);
     }
 
     /**
@@ -73,15 +70,14 @@ public class BgTasks {
      *
      * @param activity activity to which the callbacks should be delivered
      * @param executor executor to be used
-     * @param tag      tag by which the task is identified
      * @param task     task to be started
      * @param params   optional params for the task
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
     public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity, Executor
-            executor, Object tag, BaseTask task, Object... params) {
+            executor,  BaseTask task, Object... params) {
         task.setExecutor(executor);
-        startTask(activity, tag, task, params);
+        startTask(activity, task, params);
     }
 
     /**
@@ -89,16 +85,15 @@ public class BgTasks {
      *
      * @param fragment fragment to which the callbacks should be delivered
      * @param executor executor to be used
-     * @param tag      tag by which the task is identified
      * @param task     task to be started
      * @param params   optional params for the task
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
     public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment, Executor executor,
-                                                                               Object tag, BaseTask task,
+                                                                               BaseTask task,
                                                                                Object... params) {
         task.setExecutor(executor);
-        startTask(fragment, tag, task, params);
+        startTask(fragment, task, params);
     }
 
     /**
@@ -106,26 +101,60 @@ public class BgTasks {
      *
      * @param view     view in which to return callbacks
      * @param executor executor to be used
-     * @param tag      tag by which the task is identified
      * @param task     task to be started
      * @param params   optional params for the task
      * @param <T>      Must extend View implement IBgTaskCallbacks
      */
     @SuppressWarnings("unchecked")
-    public static <T extends View & IBgTaskSimpleCallbacks> void startTask(T view, Executor executor, Object
-            tag, BaseTask task, Object... params) {
+    public static <T extends View & IBgTaskSimpleCallbacks> void startTask(T view, Executor executor, BaseTask task, Object... params) {
         task.setExecutor(executor);
-        startTask(view, tag, task, params);
+        startTask(view, task, params);
+    }
+
+    /**
+     * Method that starts the task from activity
+     *
+     * @param activity activity to which the callbacks should be delivered
+     * @param chain    chain to be started
+     * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
+     */
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void startTask(T activity,
+                                                                                       BgTaskChain chain) {
+        chain.run(activity);
+    }
+
+
+    /**
+     * Method that starts the task from fragment
+     *
+     * @param fragment fragment to which the callbacks should be delivered
+     * @param chain    chain to be started
+     * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
+     */
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void startTask(T fragment,BgTaskChain chain) {
+        chain.run(fragment);
+    }
+
+    /**
+     * Method that starts the task from view
+     *
+     * @param view   view in which to return callbacks
+     * @param chain    chain to be started
+     * @param <T>    Must extend View implement IBgTaskCallbacks
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends View & IBgTaskSimpleCallbacks> void startTask(T view, BgTaskChain chain) {
+       chain.run(view);
     }
 
     /**
      * Method that cancels the execution of the task with given tag
      *
      * @param activity activity to which the callback should be delivered
-     * @param tag      tag of the task to be cancelled
+     * @param tag      tag task to be cancelled
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      */
-    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void cancelTask(T activity, Object tag) {
+    public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> void cancelTask(T activity,String tag) {
         getFragment(activity).cancelTask(tag);
     }
 
@@ -133,10 +162,10 @@ public class BgTasks {
      * Method that cancels the execution of the task with given tag
      *
      * @param fragment fragment to which the callbacks should be delivered
-     * @param tag      tag of the task to be cancelled
+     * @param tag     tag to be cancelled
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      */
-    public static <T extends Fragment & IBgTaskSimpleCallbacks> void cancelTask(T fragment, Object tag) {
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> void cancelTask(T fragment,  String tag) {
         getFragment(fragment).cancelTask(tag);
     }
 
@@ -144,23 +173,24 @@ public class BgTasks {
      * Method that cancels the execution of the task with given tag
      *
      * @param view view to which the callbacks should be delivered
-     * @param tag  tag of the task to be cancelled
+     * @param tag tag to be cancelled
      * @param <T>  Must extend View and implement IBgTaskCallbacks
      */
-    public static <T extends View & IBgTaskSimpleCallbacks> void cancelTask(T view, Object tag) {
-        getFragment(view).cancelTask(tag);
+    public static <T extends View & IBgTaskSimpleCallbacks> void cancelTask(T view,  String tag) {
+        getFragment(view).cancelChain(tag);
     }
+
 
     /**
      * Method which determines whether the task is running
      *
      * @param activity current activity
-     * @param tag      tag of the task
+     * @param tag     tag of task
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      * @return true if the task with given tag is in progress
      */
     public static <T extends FragmentActivity & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T activity,
-                                                                                                 Object tag) {
+                                                                                                 String tag) {
         return getFragment(activity).isTaskInProgress(tag);
     }
 
@@ -168,11 +198,11 @@ public class BgTasks {
      * Method which determines whether the task is running
      *
      * @param fragment current fragment
-     * @param tag      tag of the task
+     * @param tag     tag of task
      * @param <T>      Must extend android.support.v4.app.Fragment and implement IBgTaskCallbacks
      * @return true if the task with given tag is in progress
      */
-    public static <T extends Fragment & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T fragment, Object tag) {
+    public static <T extends Fragment & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T fragment, String tag) {
         return getFragment(fragment).isTaskInProgress(tag);
     }
 
@@ -180,13 +210,15 @@ public class BgTasks {
      * Method which determines whether the task is running
      *
      * @param view view in which the task runs
-     * @param tag  tag of the task
+     * @param tag     tag of task
      * @param <T>  Must extend View and implement IBgTaskCallbacks
      * @return true if the task with given tag is in progress
      */
-    public static <T extends View & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T view, Object tag) {
+    public static <T extends View & IBgTaskSimpleCallbacks> boolean isTaskInProgress(T view, String tag) {
         return getFragment(view).isTaskInProgress(tag);
     }
+
+
 
     /**
      * Method to find the fragment used to execute background tasks
@@ -282,17 +314,17 @@ public class BgTasks {
     }
 
     protected static <V extends View & IBgTaskSimpleCallbacks, F extends Fragment & IBgTaskSimpleCallbacks, A
-            extends FragmentActivity & IBgTaskSimpleCallbacks> void startFollowingTask(IBgTaskSimpleCallbacks callbacks, Object tag, BaseTask task, Object params) {
+            extends FragmentActivity & IBgTaskSimpleCallbacks> void startFollowingTask(IBgTaskSimpleCallbacks callbacks,BaseTask task, Object params) {
         if (callbacks instanceof FragmentActivity) {
             task.setCallbackType(CallbackType.ACTIVITY);
-            getFragment((A) callbacks).startTask(tag, task, params);
+            getFragment((A) callbacks).startTask(task, params);
         }
         if (callbacks instanceof Fragment) {
             F fragment = (F) callbacks;
             Object id = getIdTagOrIdFromFragment(fragment);
             task.setCallbacksId(id);
             task.setCallbackType(CallbackType.FRAGMENT);
-            getFragment(fragment).startTask(tag, task, params);
+            getFragment(fragment).startTask(task, params);
             task.setCallbackType(CallbackType.FRAGMENT);
         }
         if (callbacks instanceof View) {
@@ -300,7 +332,7 @@ public class BgTasks {
             task.setCallbackType(CallbackType.VIEW);
             Object id = getIdTagOrIdFromView(view);
             task.setCallbacksId(id);
-            getFragment(view).startTask(tag, task, params);
+            getFragment(view).startTask( task, params);
         }
     }
 }

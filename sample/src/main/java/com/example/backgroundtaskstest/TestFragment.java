@@ -31,20 +31,21 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
         mRoot.findViewById(R.id.button_taskf).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.startTask(TestFragment.this, TASKTAG, new TestTask());
+                BgTasks.startTask(TestFragment.this,new TestTask().withTag(TASKTAG));
             }
         });
         mRoot.findViewById(R.id.button_chainf).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                new BgTaskChain(TestFragment.this).addTask(CHAINTAG, new TestTask()).addTask(CHAINTAG,
-                        new TestTask()).run();
+
+                BgTasks.startTask(TestFragment.this,  new BgTaskChain().addTask(new TestTask()).addTask(
+                        new TestTask()).withTag(CHAINTAG));
             }
         });
         mRoot.findViewById(R.id.button_cancel_taskf).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.cancelTask(TestFragment.this, TASKTAG);
+                BgTasks.cancelTask(TestFragment.this,TASKTAG);
             }
         });
         mRoot.findViewById(R.id.button_cancel_chainf).setOnClickListener(new OnClickListener() {
@@ -59,24 +60,32 @@ public class TestFragment extends Fragment implements IBgTaskCallbacks {
     @Override
     public void onTaskReady(BaseTask task) {
         Log.i("TAG", "onTaskReady " + task.getTag());
+        Log.i("TAG", "onTaskReady " + task.getChainTag());
     }
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
-        Log.i("TAG","onTaskProgress "+task.getTag()+"   "+progress[0]);
+        Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
+                     progress[0]);
+        Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
+                     progress[0]);
     }
+
     @Override
     public void onTaskCancelled(BaseTask task, Object result) {
         Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
+        Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
     }
 
     @Override
     public void onTaskSuccess(BaseTask task, Object result) {
-        Log.i("TAG","onTaskSuccess "+task.getTag()+"   "+result);
+        Log.i("TAG", "onTaskSuccess " + task.getTag() + "   " + result);
+        Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
     }
 
     @Override
     public void onTaskFail(BaseTask task, Exception exception) {
-        Log.i("TAG","onTaskFail "+task.getTag());
+        Log.i("TAG", "onTaskFail " + task.getTag());
+        Log.i("TAG", "onTaskFail " + task.getChainTag());
     }
 }

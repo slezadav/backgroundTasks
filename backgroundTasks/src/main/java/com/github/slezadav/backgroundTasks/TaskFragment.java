@@ -104,12 +104,11 @@ public class TaskFragment extends Fragment {
     /**
      * Starts the task
      *
-     * @param tag    tag identified the task
      * @param task   task to be started
      * @param params optional params passed to task
      */
-    protected void startTask(Object tag, BaseTask task, Object... params) {
-        prepareTask(tag, task, params);
+    protected void startTask(BaseTask task, Object... params) {
+        prepareTask(task, params);
         if (task.isReady()) {
             executeTask(task, params);
         }
@@ -132,10 +131,30 @@ public class TaskFragment extends Fragment {
      * @return Task with given tag
      */
     @Nullable
-    private ArrayList<BaseTask> getTaskByTag(Object tag) {
+    private ArrayList<BaseTask> getTaskByTag(String tag) {
         ArrayList<BaseTask> tasks = null;
         for (BaseTask task : mTasks.keySet()) {
-            if (task.getTag().equals(tag)) {
+            if (tag!=null&&task.getTag().equals(tag)) {
+                if (tasks == null) {
+                    tasks = new ArrayList<>();
+                }
+                tasks.add(task);
+            }
+        }
+        return tasks;
+    }
+
+    /**
+     * Finds the task by its tag
+     *
+     * @param tag tag searched for
+     * @return Task with given tag
+     */
+    @Nullable
+    private ArrayList<BaseTask> getTaskByChainTag(String tag) {
+        ArrayList<BaseTask> tasks = null;
+        for (BaseTask task : mTasks.keySet()) {
+            if (tag!=null&&tag.equals(task.getChainTag())) {
                 if (tasks == null) {
                     tasks = new ArrayList<>();
                 }
@@ -148,24 +167,40 @@ public class TaskFragment extends Fragment {
     /**
      * Finds out if the task is in progress
      *
-     * @param tag tag of the task
+     * @param tag tag of task
      * @return true if the task is in progress
      */
-    protected boolean isTaskInProgress(Object tag) {
-        return getTaskByTag(tag) != null;
+    protected boolean isTaskInProgress(String tag) {
+        return getTaskByTag(tag) != null || getTaskByChainTag(tag) != null;
     }
 
     /**
      * Cancels task in progress
      *
-     * @param tag tag of the task to be cancelled
+     * @param tag task to be cancelled
      */
-    protected void cancelTask(Object tag) {
+    protected void cancelTask(String tag) {
         ArrayList<BaseTask> tasks = getTaskByTag(tag);
         if (tasks != null) {
-            for (BaseTask task : tasks) {
-                task.cancel(true);
-                mTasks.remove(task);
+            for (BaseTask t : tasks) {
+                t.cancel(true);
+                mTasks.remove(t);
+            }
+        }
+        cancelChain(tag);
+    }
+
+    /**
+     * Cancels chain in progress
+     *
+     * @param tag tag of chain to be cancelled
+     */
+    protected void cancelChain(String tag) {
+        ArrayList<BaseTask> tasks = getTaskByChainTag(tag);
+        if (tasks != null) {
+            for (BaseTask t : tasks) {
+                t.cancel(true);
+                mTasks.remove(t);
             }
         }
     }
@@ -186,12 +221,10 @@ public class TaskFragment extends Fragment {
     /**
      * Prepares the task for execution
      *
-     * @param tag    tag of the task
      * @param task   task to be prepared
      * @param params params for the task
      */
-    protected void prepareTask(Object tag, BaseTask task, Object... params) {
-        task.setTag(tag);
+    protected void prepareTask(BaseTask task, Object... params) {
         task.setEnclosingFragment(this);
         reassignCallbacks(task);
         if (task.getCallbacks() != null) {
@@ -254,7 +287,7 @@ public class TaskFragment extends Fragment {
             BaseTask task = setElement.getKey();
             Object result = setElement.getValue();
             reassignCallbacks(task);
-            handlePostExecute(task.getCallbacks(), task, result);
+            handlePostExecute(task, result);
             iterator.remove();
         }
     }
@@ -262,18 +295,17 @@ public class TaskFragment extends Fragment {
     /**
      * Handles the task after it calls onPostExecute
      *
-     * @param callbacks callback where to return the result
      * @param task      task
      * @param result    task result
      */
-    protected void handlePostExecute(IBgTaskSimpleCallbacks callbacks, BaseTask task, Object result) {
-        if (callbacks != null) {
+    protected void handlePostExecute(BaseTask task, Object result) {
+        if (task.getCallbacks() != null) {
             if (result != null && Exception.class.isAssignableFrom(result.getClass())) {
-                callbacks.onTaskFail(task, (Exception) result);
+                task.getCallbacks().onTaskFail(task, (Exception) result);
             } else {
-                callbacks.onTaskSuccess(task, result);
+                task.getCallbacks().onTaskSuccess(task, result);
                 if (task.getFollowingTask() != null) {
-                    BgTasks.startFollowingTask(callbacks, task.getFollowingTask().getTag(),
+                    BgTasks.startFollowingTask(task.getFollowingTask().getCallbacks(),
                             task.getFollowingTask(), result);
                 }
             }
@@ -284,26 +316,24 @@ public class TaskFragment extends Fragment {
     /**
      * Handles the progress publishing of the task
      *
-     * @param callbacks callback where to publish
      * @param task      task
      * @param progress  progress published by the task
      */
-    protected void handleProgress(IBgTaskCallbacks callbacks, BaseTask task, Object... progress) {
-        if (callbacks == null) {
+    protected void handleProgress(BaseTask task, Object... progress) {
+        if (task.getCallbacks() == null) {
             return;
         }
-        callbacks.onTaskProgressUpdate(task, (Object[]) progress);
+        ((IBgTaskCallbacks)task.getCallbacks()).onTaskProgressUpdate(task, (Object[]) progress);
     }
 
     /**
-     * Handles the pre execution of the tag
+     * Handles the pre execution of the task
      *
-     * @param callbacks callback where to return
      * @param task      task
      */
-    protected void handlePreExecute(IBgTaskCallbacks callbacks, BaseTask task) {
-        if (callbacks != null) {
-            callbacks.onTaskReady(task);
+    protected void handlePreExecute(BaseTask task) {
+        if (task.getCallbacks() != null) {
+            ((IBgTaskCallbacks)task.getCallbacks()).onTaskReady(task);
         }
     }
 

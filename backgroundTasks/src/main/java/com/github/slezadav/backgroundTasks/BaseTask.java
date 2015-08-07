@@ -9,6 +9,7 @@ import com.github.slezadav.backgroundTasks.executor.ParallelExecutor;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 /**
@@ -28,7 +29,11 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     /**
      * Tag associated with this task
      */
-    private Object mTag;
+    private String mTag;
+    /**
+     * Tag associated with this task
+     */
+    private String mChainTag;
     /**
      * Flag if this task is ready for execution
      */
@@ -45,6 +50,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 
     /**
      * Gets callback type
+     *
      * @return clb type
      */
     protected CallbackType getCallbackType() {
@@ -53,6 +59,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 
     /**
      * Sets the callback type
+     *
      * @param type type of callback
      */
     protected void setCallbackType(CallbackType type) {
@@ -92,22 +99,46 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      */
     private BaseTask followingTask;
 
+
+    /**
+     * Constructor
+     */
+    public BaseTask() {
+        this.mTag = UUID.randomUUID().toString();
+    }
+
+    public BaseTask withTag(String tag){
+        this.mTag=tag;
+        return this;
+    }
+
+
     /**
      * Sets the task following after this one
+     *
      * @param followingTask task to follow
      */
-    protected BaseTask addFollowingTask(Object tag, BaseTask followingTask) {
+    protected BaseTask addFollowingTask(BaseTask followingTask) {
         this.followingTask = followingTask;
-        followingTask.setTag(tag);
         return followingTask;
     }
 
     /**
      * Gets the following task
+     *
      * @return the following task
      */
     public BaseTask getFollowingTask() {
         return followingTask;
+    }
+
+
+    public String getChainTag() {
+        return mChainTag;
+    }
+
+    protected void setChainTag(String mChainTag) {
+        this.mChainTag = mChainTag;
     }
 
     /**
@@ -118,6 +149,9 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     protected void setCallbacks(IBgTaskSimpleCallbacks clb) {
         fullCallBacks = clb instanceof IBgTaskCallbacks;
         this.mCallbacks = new WeakReference<>(clb);
+        if(followingTask!=null){
+            followingTask.setCallbacks(clb);
+        }
     }
 
     /**
@@ -147,7 +181,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return this task's tag
      */
-    public Object getTag() {
+    public String getTag() {
         return mTag;
     }
 
@@ -190,16 +224,6 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         }
     }
 
-
-    /**
-     * Sets this task's tag
-     *
-     * @param tag tag to be used with this task
-     */
-    protected void setTag(Object tag) {
-        this.mTag = tag;
-    }
-
     /**
      * Flag if this task is ready for execution
      *
@@ -224,7 +248,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && fullCallBacks) {
-            mEnclosingFragment.get().handlePreExecute((IBgTaskCallbacks) mCallbacks.get(), this);
+            mEnclosingFragment.get().handlePreExecute( this);
         }
     }
 
@@ -235,7 +259,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && fullCallBacks) {
-            mEnclosingFragment.get().handleProgress((IBgTaskCallbacks) mCallbacks.get(), this,
+            mEnclosingFragment.get().handleProgress(this,
                     (Object[]) progress);
         }
     }
@@ -271,7 +295,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             return;
         }
         if (canUseCallbacks() && !isCancelled()) {
-            mEnclosingFragment.get().handlePostExecute(mCallbacks.get(), this, result);
+            mEnclosingFragment.get().handlePostExecute( this, result);
         } else if (mEnclosingFragment.get() != null && !isCancelled()) {
             mEnclosingFragment.get().onUnresolvedResult(this, result);
         }
