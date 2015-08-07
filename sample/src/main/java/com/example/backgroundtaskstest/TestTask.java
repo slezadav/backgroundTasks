@@ -18,5 +18,9 @@ public class TestTask extends BaseTask {
         return true;
     }
 
+    @Override
+    public String getTag() {
+        return "task";
+    }
 
 }

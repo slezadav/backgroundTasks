@@ -16,7 +16,7 @@ public class BgTaskChain {
         this.mTag= UUID.randomUUID().toString();
     }
 
-    public BgTaskChain addTask(BaseTask task){
+    public final BgTaskChain addTask(BaseTask task){
         task.setChainTag(mTag);
         if(!tasks.isEmpty()){
             tasks.get(tasks.size()-1).addFollowingTask(task);
@@ -24,7 +24,8 @@ public class BgTaskChain {
         tasks.add(task);
         return this;
     }
-    public BgTaskChain withTag(String tag){
+
+    public final BgTaskChain addTag(String tag){
         this.mTag=tag;
         for (BaseTask task:tasks){
             task.setChainTag(mTag);
@@ -32,11 +33,14 @@ public class BgTaskChain {
         return this;
     }
 
-    protected String getTag() {
+    public String getTag() {
         return mTag;
     }
 
-    protected void run(IBgTaskSimpleCallbacks clb){
+    final void run(IBgTaskSimpleCallbacks clb){
+        for (BaseTask task:tasks){
+            task.setChainTag(getTag());
+        }
         if(!tasks.isEmpty()){
             BgTasks.startFollowingTask(clb,tasks.get(0),null);
         }

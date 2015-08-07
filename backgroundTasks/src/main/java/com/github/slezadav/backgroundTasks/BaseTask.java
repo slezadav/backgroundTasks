@@ -47,13 +47,17 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      * Callback type
      */
     private CallbackType mCallbackType;
+    /**
+     * task number
+     */
+    private int mTaskNumber=0;
 
     /**
      * Gets callback type
      *
      * @return clb type
      */
-    protected CallbackType getCallbackType() {
+    CallbackType getCallbackType() {
         return mCallbackType;
     }
 
@@ -62,7 +66,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param type type of callback
      */
-    protected void setCallbackType(CallbackType type) {
+    void setCallbackType(CallbackType type) {
         this.mCallbackType = type;
     }
 
@@ -71,7 +75,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return Id of the callback fragment. Null if the callbacks are in activity
      */
-    protected Object getCallbacksId() {
+    Object getCallbacksId() {
         return mCallbacksId;
     }
 
@@ -80,7 +84,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param callbacksId id of the fragment used as a callback target for this task
      */
-    protected void setCallbacksId(Object callbacksId) {
+    void setCallbacksId(Object callbacksId) {
         this.mCallbacksId = callbacksId;
     }
 
@@ -107,9 +111,16 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         this.mTag = UUID.randomUUID().toString();
     }
 
-    public BaseTask withTag(String tag){
+    public final BaseTask addTag(String tag){
         this.mTag=tag;
         return this;
+    }
+
+    void setTaskNumber(int number){
+        this.mTaskNumber=number;
+    }
+    public int getTaskNumber(){
+        return mTaskNumber;
     }
 
 
@@ -118,7 +129,8 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param followingTask task to follow
      */
-    protected BaseTask addFollowingTask(BaseTask followingTask) {
+    final BaseTask addFollowingTask(BaseTask followingTask) {
+        followingTask.setTaskNumber(getTaskNumber()+1);
         this.followingTask = followingTask;
         return followingTask;
     }
@@ -128,20 +140,15 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return the following task
      */
-    protected BaseTask getFollowingTask() {
+    final BaseTask getFollowingTask() {
         return followingTask;
     }
 
-
-    protected String readChainTag() {
+    public final String getChainTag(){
         return mChainTag;
     }
 
-    public String getChainTag(){
-        return mChainTag;
-    }
-
-    protected void setChainTag(String mChainTag) {
+    void setChainTag(String mChainTag) {
         this.mChainTag = mChainTag;
     }
 
@@ -150,7 +157,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param clb Callbacks to be used with this task
      */
-    protected void setCallbacks(IBgTaskSimpleCallbacks clb) {
+    void setCallbacks(IBgTaskSimpleCallbacks clb) {
         fullCallBacks = clb instanceof IBgTaskCallbacks;
         this.mCallbacks = new WeakReference<>(clb);
         if(followingTask!=null){
@@ -163,7 +170,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return task's callbacks
      */
-    protected IBgTaskSimpleCallbacks getCallbacks() {
+    IBgTaskSimpleCallbacks getCallbacks() {
         if (mCallbacks != null) {
             return mCallbacks.get();
         } else {
@@ -176,7 +183,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param enclosingFragment TaskFragment instance used to start this task
      */
-    protected void setEnclosingFragment(TaskFragment enclosingFragment) {
+    void setEnclosingFragment(TaskFragment enclosingFragment) {
         this.mEnclosingFragment = new WeakReference<>(enclosingFragment);
     }
 
@@ -185,10 +192,6 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return this task's tag
      */
-    protected String readTag() {
-        return mTag;
-    }
-
     public String getTag(){
         return mTag;
     }
@@ -199,7 +202,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return Executor if specified or default one
      */
-    protected Executor getExecutor() {
+    Executor getExecutor() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
             return mExecutor != null ? mExecutor : ParallelExecutor.getExecutorInstance();
         } else {
@@ -212,7 +215,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param executor executor to be set
      */
-    protected void setExecutor(Executor executor) {
+    void setExecutor(Executor executor) {
         this.mExecutor = executor;
     }
 
@@ -238,7 +241,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @return true if the task is ready
      */
-    protected boolean isReady() {
+    boolean isReady() {
         return mReady;
     }
 
@@ -247,12 +250,13 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
      *
      * @param ready sets this task ready or not
      */
-    protected void setReady(boolean ready) {
+    void setReady(boolean ready) {
         this.mReady = ready;
     }
 
     @Override
-    protected void onPreExecute() {
+    protected final void onPreExecute() {
+        doOnPreExecute();
         if (!canAskForCallbacks()) {
             return;
         }
@@ -261,9 +265,12 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         }
     }
 
+    protected void doOnPreExecute(){
+    }
 
     @Override
-    protected void onProgressUpdate(Object... progress) {
+    protected final void onProgressUpdate(Object... progress) {
+        doOnProgressUpdate( (Object[]) progress);
         if (!canAskForCallbacks()) {
             return;
         }
@@ -272,10 +279,13 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
                     (Object[]) progress);
         }
     }
+    protected void doOnProgressUpdate(Object... progress){
+    }
 
     @Override
-    protected void onCancelled(Object result) {
+    protected final void onCancelled(Object result) {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+            doOnCancelled(result);
             if (!canAskForCallbacks()) {
                 return;
             }
@@ -283,12 +293,15 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
                 mEnclosingFragment.get().handleCancel(mCallbacks.get(), this, result);
             }
         }
+    }
 
+    protected void doOnCancelled(Object result){
     }
 
     @Override
-    protected void onCancelled() {
+    protected final void onCancelled() {
         if (Build.VERSION.SDK_INT < VERSION_CODES.HONEYCOMB) {
+            doOnCancelled();
             if (!canAskForCallbacks()) {
                 return;
             }
@@ -297,17 +310,24 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
             }
         }
     }
+    protected void doOnCancelled(){
+    }
 
     @Override
-    protected void onPostExecute(Object result) {
+    protected final void onPostExecute(Object result) {
+        doOnPostExecute(result);
         if (!canAskForCallbacks()) {
             return;
         }
         if (canUseCallbacks() && !isCancelled()) {
-            mEnclosingFragment.get().handlePostExecute( this, result);
+            mEnclosingFragment.get().handlePostExecute(this, result);
         } else if (mEnclosingFragment.get() != null && !isCancelled()) {
             mEnclosingFragment.get().onUnresolvedResult(this, result);
         }
+    }
+
+    void doOnPostExecute(Object result){
+
     }
 
     /**
@@ -335,7 +355,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
         return callbacksValid && taskFragmentValid && !detached;
     }
 
-    protected enum CallbackType {
+    enum CallbackType {
         ACTIVITY, FRAGMENT, VIEW
     }
 

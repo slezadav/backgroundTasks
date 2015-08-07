@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
  *
  * Created by Davo on 12.6.2015.
  */
-public class BgTasks {
+public final class BgTasks {
     /**
      * Method that starts the task from activity
      *
@@ -177,7 +177,7 @@ public class BgTasks {
      * @param <T>  Must extend View and implement IBgTaskCallbacks
      */
     public static <T extends View & IBgTaskSimpleCallbacks> void cancelTask(T view,  String tag) {
-        getFragment(view).cancelChain(tag);
+        getFragment(view).cancelTask(tag);
     }
 
 
@@ -250,7 +250,7 @@ public class BgTasks {
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {
             fragment = new TaskFragment();
-            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commit();
+            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
             fm.executePendingTransactions();
         }
         return fragment;
@@ -270,7 +270,7 @@ public class BgTasks {
             TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
             if (fragment == null) {
                 fragment = new TaskFragment();
-                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commit();
+                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
                 fm.executePendingTransactions();
             }
             return fragment;
@@ -313,7 +313,7 @@ public class BgTasks {
         }
     }
 
-    protected static <V extends View & IBgTaskSimpleCallbacks, F extends Fragment & IBgTaskSimpleCallbacks, A
+    static <V extends View & IBgTaskSimpleCallbacks, F extends Fragment & IBgTaskSimpleCallbacks, A
             extends FragmentActivity & IBgTaskSimpleCallbacks> void startFollowingTask(IBgTaskSimpleCallbacks callbacks,BaseTask task, Object params) {
         if (callbacks instanceof FragmentActivity) {
             task.setCallbackType(CallbackType.ACTIVITY);

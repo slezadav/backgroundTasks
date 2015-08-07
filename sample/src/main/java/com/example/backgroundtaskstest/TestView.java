@@ -32,55 +32,50 @@ public class TestView extends Button implements IBgTaskCallbacks {
 
     @Override
     public void onTaskReady(BaseTask task) {
-        Log.i("TAG", "onTaskReady " + task.getTag());
-        if(task.getChainTag()!=null){
-            Log.i("TAG", "onTaskReady " + task.getChainTag());
-        }
+
+        Log.i("TAG", "onTaskReady " + task.getTag()+" "+task.getTaskNumber());
+
 
     }
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
-        Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
+
+        Log.i("TAG", "onTaskProgress " + task.getTag()+" "+task.getTaskNumber() + "   " +
                      progress[0]);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
-                         progress[0]);
-        }
+
     }
 
     @Override
     public void onTaskCancelled(BaseTask task, Object result) {
-        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
-        }
+
+        Log.i("TAG", "onTaskCancel " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
+
     }
 
     @Override
     public void onTaskSuccess(BaseTask task, Object result) {
-        Log.i("TAG", "onTaskSuccess " + task.getTag() + "   " + result);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
-        }
+
+        Log.i("TAG", "onTaskSuccess " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
+
     }
 
     @Override
     public void onTaskFail(BaseTask task, Exception exception) {
-        Log.i("TAG", "onTaskFail " + task.getTag());
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskFail " + task.getChainTag());
-        }
+
+        Log.i("TAG", "onTaskFail " + task.getTag()+" "+task.getTaskNumber());
+
     }
 
     private void init(){
         this.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(BgTasks.isTaskInProgress(TestView.this,MainActivity.TASKTAG)){
-                    BgTasks.cancelTask(TestView.this,MainActivity.TASKTAG);
+
+                if(BgTasks.isTaskInProgress(TestView.this,new TestTask().getTag())){
+                    BgTasks.cancelTask(TestView.this,new TestTask().getTag());
                 }else{
-                    BgTasks.startTask(TestView.this,new TestTask().withTag(MainActivity.TASKTAG));
+                    BgTasks.startTask(TestView.this,new TestTask());
                 }
             }
         });

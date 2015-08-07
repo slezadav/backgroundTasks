@@ -7,14 +7,12 @@ import android.view.View;
 import android.widget.Button;
 
 import com.github.slezadav.backgroundTasks.BaseTask;
-import com.github.slezadav.backgroundTasks.BgTaskChain;
 import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 
 
 public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
-    public static final String TASKTAG = "task";
     public static final String CHAINTAG = "chain";
 
 
@@ -26,7 +24,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
         taskb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.startTask(MainActivity.this, new TestTask().withTag(TASKTAG));
+                BgTasks.startTask(MainActivity.this, new TestTask());
             }
         });
         Button chainb = (Button) findViewById(R.id.button_chain);
@@ -34,8 +32,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
             @Override
             public void onClick(View v) {                ;
                 BgTasks.startTask(MainActivity.this,
-                        new BgTaskChain().addTask(new TestTask().withTag(TASKTAG)).addTask(new TestTask()).withTag(
-                                CHAINTAG));
+                        new TestChain().addTask(new TestTask()).addTask(new TestTask()).addTag(CHAINTAG));
             }
         });
         Button cchain = (Button) findViewById(R.id.button_cancel_chain);
@@ -49,7 +46,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
         ctask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BgTasks.cancelTask(MainActivity.this,TASKTAG);
+                BgTasks.cancelTask(MainActivity.this,new TestTask().getTag());
             }
         });
     }
@@ -58,44 +55,38 @@ public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
     @Override
     public void onTaskReady(BaseTask task) {
-        Log.i("TAG", "onTaskReady " + task.getTag());
-        if(task.getChainTag()!=null){
-            Log.i("TAG", "onTaskReady " + task.getChainTag());
-        }
+
+        Log.i("TAG", "onTaskReady " + task.getTag()+" "+task.getTaskNumber());
+
 
     }
 
     @Override
     public void onTaskProgressUpdate(BaseTask task, Object... progress) {
-        Log.i("TAG", "onTaskProgress " + task.getTag() + "   " +
+
+        Log.i("TAG", "onTaskProgress " + task.getTag()+" "+task.getTaskNumber() + "   " +
                      progress[0]);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskProgress " + task.getChainTag() + "   " +
-                         progress[0]);
-        }
+
     }
 
     @Override
     public void onTaskCancelled(BaseTask task, Object result) {
-        Log.i("TAG", "onTaskCancel " + task.getTag() + "   " + result);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskCancel " + task.getChainTag() + "   " + result);
-        }
+
+        Log.i("TAG", "onTaskCancel " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
+
     }
 
     @Override
     public void onTaskSuccess(BaseTask task, Object result) {
-        Log.i("TAG", "onTaskSuccess " + task.getTag() + "   " + result);
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskSuccess " + task.getChainTag() + "   " + result);
-        }
+
+        Log.i("TAG", "onTaskSuccess " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
+
     }
 
     @Override
     public void onTaskFail(BaseTask task, Exception exception) {
-        Log.i("TAG", "onTaskFail " + task.getTag());
-        if(task.getChainTag()!=null) {
-            Log.i("TAG", "onTaskFail " + task.getChainTag());
-        }
+
+        Log.i("TAG", "onTaskFail " + task.getTag()+" "+task.getTaskNumber());
+
     }
 }
