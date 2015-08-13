@@ -28,7 +28,12 @@ public final class BgTasks {
                                                                                        BaseTask task, Object...
                                                                                                params) {
         task.setCallbackType(CallbackType.ACTIVITY);
-        getFragment(activity).startTask(task, params);
+        TaskFragment taskFragment=getFragment(activity);
+        if(taskFragment!=null){
+            taskFragment.startTask(task, params);
+        }else{
+            task.onCancelled();
+        }
     }
 
 
@@ -45,7 +50,13 @@ public final class BgTasks {
         Object id = getIdTagOrIdFromFragment(fragment);
         task.setCallbacksId(id);
         task.setCallbackType(CallbackType.FRAGMENT);
-        getFragment(fragment).startTask(task, params);
+
+        TaskFragment taskFragment=getFragment(fragment);
+        if(taskFragment!=null){
+            taskFragment.startTask(task, params);
+        }else{
+            task.onCancelled();
+        }
     }
 
     /**
@@ -62,7 +73,12 @@ public final class BgTasks {
         task.setCallbackType(CallbackType.VIEW);
         Object id = getIdTagOrIdFromView(view);
         task.setCallbacksId(id);
-        getFragment(view).startTask(task, params);
+        TaskFragment taskFragment=getFragment(view);
+        if(taskFragment!=null){
+            taskFragment.startTask(task, params);
+        }else{
+            task.onCancelled();
+        }
     }
 
     /**
@@ -232,8 +248,12 @@ public final class BgTasks {
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {
             fragment = new TaskFragment();
-            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
-            fm.executePendingTransactions();
+            try {
+                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
+                fm.executePendingTransactions();
+            }catch(IllegalStateException e){
+                return null;
+            }
         }
         return fragment;
     }
@@ -250,8 +270,12 @@ public final class BgTasks {
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {
             fragment = new TaskFragment();
-            fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
-            fm.executePendingTransactions();
+            try {
+                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
+                fm.executePendingTransactions();
+            }catch(IllegalStateException e){
+                return null;
+            }
         }
         return fragment;
     }
@@ -270,8 +294,12 @@ public final class BgTasks {
             TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
             if (fragment == null) {
                 fragment = new TaskFragment();
-                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
-                fm.executePendingTransactions();
+                try {
+                    fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
+                    fm.executePendingTransactions();
+                }catch(IllegalStateException e){
+                    return null;
+                }
             }
             return fragment;
         } else {
@@ -317,22 +345,37 @@ public final class BgTasks {
             extends FragmentActivity & IBgTaskSimpleCallbacks> void startFollowingTask(IBgTaskSimpleCallbacks callbacks,BaseTask task, Object params) {
         if (callbacks instanceof FragmentActivity) {
             task.setCallbackType(CallbackType.ACTIVITY);
-            getFragment((A) callbacks).startTask(task, params);
+            TaskFragment taskFragment=getFragment((A)callbacks);
+            if(taskFragment!=null){
+                taskFragment.startTask(task, params);
+            }else{
+                task.doOnCancelled();
+            }
         }
         if (callbacks instanceof Fragment) {
             F fragment = (F) callbacks;
             Object id = getIdTagOrIdFromFragment(fragment);
             task.setCallbacksId(id);
             task.setCallbackType(CallbackType.FRAGMENT);
-            getFragment(fragment).startTask(task, params);
-            task.setCallbackType(CallbackType.FRAGMENT);
+            TaskFragment taskFragment=getFragment(fragment);
+            if(taskFragment!=null){
+                taskFragment.startTask(task, params);
+            }else{
+                task.doOnCancelled();
+            }
         }
         if (callbacks instanceof View) {
             V view = (V) callbacks;
             task.setCallbackType(CallbackType.VIEW);
             Object id = getIdTagOrIdFromView(view);
             task.setCallbacksId(id);
-            getFragment(view).startTask( task, params);
+            TaskFragment taskFragment=getFragment(view);
+            if(taskFragment!=null){
+                taskFragment.startTask(task, params);
+            }else{
+                task.doOnCancelled();
+            }
         }
+
     }
 }
