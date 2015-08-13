@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.5.2'
+    compile 'com.github.slezadav:backgroundTasks:1.5.3'
 }
 ```
 
