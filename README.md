@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.5.1'
+    compile 'com.github.slezadav:backgroundTasks:1.5.2'
 }
 ```
 
@@ -24,10 +24,16 @@ public class MyTask extends BaseTask {
         // do your stuff here
         return true;
     }
+     //optional, but useful
+     @Override
+     public String getTag(){
+     return "MyTag";
+     }
 }
 ```
-
 As with AsyncTask you can you can use methods like `publishProgress(Object object)`,`cancel(Boolean mayInterruptIfRunning)`,`get()` and so on.
+
+If you want to use methods like `cancel` or `isTaskRunning`, your implementation shoul override `getTag` method of the `BaseTask`.
 
 #Task callbacks
 In order to start a task your `Activity` , `Fragment` or `View` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
@@ -53,7 +59,7 @@ BgTasks.startTask(activity/*(fragment,view)*/,task,params)
 or
 
 ```java
-BgTasks.startTask(activity/*(fragment,view)*/,task.withTag(tag),params)
+BgTasks.startTask(activity/*(fragment,view)*/,task,params)
 ```
 The `tag` parameter in the call accepts a String which is then used to identify the task.
 
@@ -68,7 +74,7 @@ public class MainActivity extends FragmentActivity implements IBgTaskSimpleCallb
 public static final String TASKTAG="my_task";
 
  private void start(){
-     BgTasks.startTask(this,new MyTask().withTag(TASKTAG));
+     BgTasks.startTask(this,new MyTask());
  }
  
  @Override
