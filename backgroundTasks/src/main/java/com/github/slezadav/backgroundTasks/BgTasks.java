@@ -1,6 +1,8 @@
 package com.github.slezadav.backgroundTasks;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -288,9 +290,9 @@ public final class BgTasks {
      * @return TaskFragment instance for performing background tasks
      */
     private static <T extends View & IBgTaskSimpleCallbacks> TaskFragment getFragment(T view) {
-        Context context = view.getContext();
-        if (context instanceof FragmentActivity) {
-            FragmentManager fm = ((FragmentActivity) context).getSupportFragmentManager();
+        Activity activity=getActivityFromContext(view.getContext());
+        if (activity instanceof FragmentActivity) {
+            FragmentManager fm = ((FragmentActivity) activity).getSupportFragmentManager();
             TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
             if (fragment == null) {
                 fragment = new TaskFragment();
@@ -377,5 +379,16 @@ public final class BgTasks {
             }
         }
 
+    }
+
+
+    private static Activity getActivityFromContext(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
     }
 }
