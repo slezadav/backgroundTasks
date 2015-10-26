@@ -1,5 +1,6 @@
 package com.github.slezadav.backgroundTasks;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -121,6 +122,16 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
     }
     public int getTaskNumber(){
         return mTaskNumber;
+    }
+
+    public Activity getWrappingActivity(){
+        if(mEnclosingFragment!=null){
+            TaskFragment fragment=mEnclosingFragment.get();
+            if(fragment!=null){
+                return fragment.getActivity();
+            }
+        }
+        return null;
     }
 
 
