@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:2.1.0'
     }
 }
 
@@ -18,8 +18,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 22
-        versionCode 10505
-        versionName "1.5.5"
+        versionCode 10506
+        versionName "1.5.6"
     }
     buildTypes {
         release {
