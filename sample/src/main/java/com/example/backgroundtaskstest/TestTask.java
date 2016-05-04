@@ -11,6 +11,7 @@ public class TestTask extends BaseTask {
         try {
             Thread.sleep(2000);
             publishProgress(true);
+            startTaskInSameContext(new TestTask2(1));
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -23,4 +24,9 @@ public class TestTask extends BaseTask {
         return "task";
     }
 
+    @Override
+    protected void doOnPostExecute(Object result) {
+        super.doOnPostExecute(result);
+        startTaskInSameContext(new TestTask2(2));
+    }
 }

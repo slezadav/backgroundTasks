@@ -343,7 +343,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 		}
 	}
 
-	void doOnPostExecute(Object result) {
+	protected void doOnPostExecute(Object result) {
 
 	}
 
@@ -375,7 +375,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 		return callbacksValid && taskFragmentValid && !detached;
 	}
 
-	private void startTaskInSameContext(BaseTask task,
+	protected void startTaskInSameContext(BaseTask task,
 										Object... params) {
 		task.setCallbacksId(getCallbacksId());
 		task.setCallbackType(getCallbackType());
