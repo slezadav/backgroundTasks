@@ -18,6 +18,20 @@ import java.util.concurrent.Executor;
  * Created by Davo on 12.6.2015.
  */
 public final class BgTasks {
+
+
+    public static <T extends IBgTasksFullCallbacks> void startTask(T object,BaseTask task, Object...
+                                                                                         params) {
+        task.setCallbacksId(object);
+        task.setCallbackType(CallbackType.OBJECT);
+        TaskFragment taskFragment=getFragment(object.getActivity());
+        if(taskFragment!=null){
+
+            taskFragment.startTask(task, params);
+        }else{
+            task.onCancelled();
+        }
+    }
     /**
      * Method that starts the task from activity
      *
@@ -245,7 +259,23 @@ public final class BgTasks {
      * @param <T>      Must extend FragmentActivity and implement IBgTaskCallbacks
      * @return TaskFragment instance for performing background tasks
      */
-    private static <T extends FragmentActivity & IBgTaskSimpleCallbacks> TaskFragment getFragment(T activity) {
+//    private static <T extends FragmentActivity & IBgTaskSimpleCallbacks> TaskFragment getFragment(T activity) {
+//        FragmentManager fm = activity.getSupportFragmentManager();
+//        TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
+//        if (fragment == null) {
+//            fragment = new TaskFragment();
+//            try {
+//                fm.beginTransaction().add(fragment, TaskFragment.TASK_FRAGMENT_TAG).commitAllowingStateLoss();
+//                fm.executePendingTransactions();
+//            }catch(IllegalStateException e){
+//                return null;
+//            }
+//        }
+//        return fragment;
+//    }
+
+
+    private static <T extends FragmentActivity> TaskFragment getFragment(T activity) {
         FragmentManager fm = activity.getSupportFragmentManager();
         TaskFragment fragment = (TaskFragment) fm.findFragmentByTag(TaskFragment.TASK_FRAGMENT_TAG);
         if (fragment == null) {

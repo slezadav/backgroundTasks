@@ -387,7 +387,7 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 	}
 
 	enum CallbackType {
-		ACTIVITY, FRAGMENT, VIEW
+		ACTIVITY, FRAGMENT, VIEW, OBJECT
 	}
 
 }

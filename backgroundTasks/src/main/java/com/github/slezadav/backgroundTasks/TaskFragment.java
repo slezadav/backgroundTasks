@@ -59,6 +59,12 @@ public class TaskFragment extends Fragment {
         resolveUnresolvedResults();
     }
 
+
+    @Nullable
+    private IBgTaskSimpleCallbacks findObjectInActivity(IBgTasksFullCallbacks object) {
+        return object.getSelfFromActivity();
+    }
+
     /**
      * Tries to find the fragment used as callback place
      *
@@ -261,6 +267,8 @@ public class TaskFragment extends Fragment {
             callbacks = (IBgTaskSimpleCallbacks) getActivity();
         } else if (task.getCallbackType() == CallbackType.VIEW && callbackId != null && getActivity() != null) {
             callbacks = findViewByTagOrId(callbackId);
+        }else if(task.getCallbackType() == CallbackType.OBJECT && callbackId != null && getActivity() != null && callbackId instanceof IBgTasksFullCallbacks) {
+            callbacks = findObjectInActivity((IBgTasksFullCallbacks)callbackId);
         }
         if (callbacks != null) {
             task.setCallbacks(callbacks);
