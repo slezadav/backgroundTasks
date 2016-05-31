@@ -5,88 +5,113 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
 import com.github.slezadav.backgroundTasks.BaseTask;
 import com.github.slezadav.backgroundTasks.BgTasks;
 import com.github.slezadav.backgroundTasks.IBgTaskCallbacks;
 
-
 public class MainActivity extends FragmentActivity implements IBgTaskCallbacks {
 
-    public static final String CHAINTAG = "chain";
+	public static final String CHAINTAG = "chain";
+	private TestObject testObject;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		testObject = new TestObject(this);
+		Button taskb = (Button)findViewById(R.id.button_task);
+		taskb.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BgTasks.startTask(MainActivity.this, new TestTask());
+			}
+		});
+		Button chainb = (Button)findViewById(R.id.button_chain);
+		chainb.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				;
+				BgTasks.startTask(MainActivity.this,
+								  new TestChain().addTask(new TestTask())
+												 .addTask(new TestTask())
+												 .addTag(CHAINTAG));
+			}
+		});
+		Button cchain = (Button)findViewById(R.id.button_cancel_chain);
+		cchain.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BgTasks.cancelTask(MainActivity.this, CHAINTAG);
+			}
+		});
+		Button ctask = (Button)findViewById(R.id.button_cancel_task);
+		ctask.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BgTasks.cancelTask(MainActivity.this, new TestTask().getTag());
+			}
+		});
+
+		Button otask = (Button)findViewById(R.id.button_object_task);
+		otask.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				testObject.start();
+			}
+		});
+		Button cotask = (Button)findViewById(R.id.button_object_task_cancel);
+		cotask.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BgTasks.cancelTask(testObject, new TestTask().getTag());
+			}
+		});
+	}
+
+	public TestObject getTestObject() {
+		return testObject;
+	}
+
+	@Override
+	public void onTaskReady(BaseTask task) {
+
+		Log.i("TAG", "onTaskReady " + task.getTag() + " " + task.getTaskNumber());
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Button taskb = (Button) findViewById(R.id.button_task);
-        taskb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BgTasks.startTask(MainActivity.this, new TestTask());
-            }
-        });
-        Button chainb = (Button) findViewById(R.id.button_chain);
-        chainb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {                ;
-                BgTasks.startTask(MainActivity.this,
-                        new TestChain().addTask(new TestTask()).addTask(new TestTask()).addTag(CHAINTAG));
-            }
-        });
-        Button cchain = (Button) findViewById(R.id.button_cancel_chain);
-        cchain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BgTasks.cancelTask(MainActivity.this, CHAINTAG);
-            }
-        });
-        Button ctask = (Button) findViewById(R.id.button_cancel_task);
-        ctask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BgTasks.cancelTask(MainActivity.this,new TestTask().getTag());
-            }
-        });
-    }
+	}
 
+	@Override
+	public void onTaskProgressUpdate(BaseTask task,
+									 Object... progress) {
 
+		Log.i("TAG", "onTaskProgress " + task.getTag() + " " + task.getTaskNumber() + "   " +
+		  progress[0]);
 
-    @Override
-    public void onTaskReady(BaseTask task) {
+	}
 
-        Log.i("TAG", "onTaskReady " + task.getTag()+" "+task.getTaskNumber());
+	@Override
+	public void onTaskCancelled(BaseTask task,
+								Object result) {
 
+		Log.i("TAG", "onTaskCancel " + task.getTag() + " " + task.getTaskNumber() + "   " +
+		  result);
 
-    }
+	}
 
-    @Override
-    public void onTaskProgressUpdate(BaseTask task, Object... progress) {
+	@Override
+	public void onTaskSuccess(BaseTask task,
+							  Object result) {
 
-        Log.i("TAG", "onTaskProgress " + task.getTag()+" "+task.getTaskNumber() + "   " +
-                     progress[0]);
+		Log.i("TAG",
+			  "onTaskSuccess " + task.getTag() + " " + task.getTaskNumber() + "   " + result);
 
-    }
+	}
 
-    @Override
-    public void onTaskCancelled(BaseTask task, Object result) {
+	@Override
+	public void onTaskFail(BaseTask task,
+						   Exception exception) {
 
-        Log.i("TAG", "onTaskCancel " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
+		Log.i("TAG", "onTaskFail " + task.getTag() + " " + task.getTaskNumber());
 
-    }
-
-    @Override
-    public void onTaskSuccess(BaseTask task, Object result) {
-
-        Log.i("TAG", "onTaskSuccess " + task.getTag()+" "+task.getTaskNumber() + "   " + result);
-
-    }
-
-    @Override
-    public void onTaskFail(BaseTask task, Exception exception) {
-
-        Log.i("TAG", "onTaskFail " + task.getTag()+" "+task.getTaskNumber());
-
-    }
+	}
 }

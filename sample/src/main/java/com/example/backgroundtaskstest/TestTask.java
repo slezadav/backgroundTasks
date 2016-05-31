@@ -11,7 +11,7 @@ public class TestTask extends BaseTask {
         try {
             Thread.sleep(2000);
             publishProgress(true);
-            startTaskInSameContext(new TestTask2(1));
+            //startTaskInSameContext(new TestTask2(1));
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();

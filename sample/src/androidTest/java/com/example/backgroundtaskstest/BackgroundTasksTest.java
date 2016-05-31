@@ -42,7 +42,10 @@ public class BackgroundTasksTest
         chainAsyncViewCancel();
         chainAsyncViewFragment();
         chainAsyncFragmentViewCancel();
+        singleAsyncObject();
+        singleAsyncObjectCancel();
     }
+
 
 
     public void singleAsync() {
@@ -245,6 +248,31 @@ public class BackgroundTasksTest
         solo.clickOnButton("Chain view");
         assertTrue("Chain did not cancel",solo.waitForLogMessage("onTaskCancel task 0",3000));
     }
+
+    private void singleAsyncObject() {
+        solo.clearLog();
+        Log.d("BackgroundTasksTest", "singleAsyncObject");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.waitForActivity(MainActivity.class, 5000);
+        solo.clickOnButton("Object Task");
+        assertTrue("Task not started", solo.waitForLogMessage("onTaskReady task 0", 1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        assertTrue("Task did not publish progress", solo.waitForLogMessage("onTaskProgress task 0", 3000));
+        assertTrue("Task did not succeed",solo.waitForLogMessage("onTaskSuccess task 0",5000));
+    }
+
+    private void singleAsyncObjectCancel() {
+        solo.clearLog();
+        Log.d("BackgroundTasksTest", "singleAsyncObjectCancel");
+        solo.setActivityOrientation(Solo.PORTRAIT);
+        solo.clickOnButton("Object Task");
+        assertTrue("Task not started", solo.waitForLogMessage("onTaskReady task 0", 1000));
+        solo.setActivityOrientation(Solo.LANDSCAPE);
+        solo.clickOnButton("Cancel Task");
+        assertTrue("Task did not cancel",solo.waitForLogMessage("onTaskCancel task 0",3000));
+    }
+
+
 
 
     @Override

@@ -52,13 +52,27 @@
         android:layout_below="@+id/button_task"
         android:layout_alignParentRight="true"/>
 
+    <Button android:text="Object Task" android:layout_width="wrap_content"
+            android:id="@+id/button_object_task"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/button_cancel_task"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+    <Button android:text="Cancel Object" android:layout_width="wrap_content"
+            android:id="@+id/button_object_task_cancel"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/testViewChain"
+            android:layout_toRightOf="@+id/button_cancel_task"
+            android:layout_toEndOf="@+id/button_cancel_task"/>
+
     <fragment
-       android:id="@+id/fragment"
+        android:id="@+id/fragment"
         android:name="com.example.backgroundtaskstest.TestFragment"
-        android:layout_below="@+id/button_cancel_chain"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/button_object_task">
 
     </fragment>
 
