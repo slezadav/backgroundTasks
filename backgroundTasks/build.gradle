@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-//apply from: 'publish.gradle'
+apply from: 'publish.gradle'
 
 buildscript {
     repositories {
@@ -12,14 +12,14 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 22
-        versionCode 10506
-        versionName "1.5.6"
+        targetSdkVersion 23
+        versionCode 10600
+        versionName "1.6.0"
     }
     buildTypes {
         release {
@@ -31,8 +31,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:support-v4:23.4.0'
 }
 
 
