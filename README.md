@@ -7,7 +7,7 @@ Add this library to dependencies in your module's `build.gradle` file:
 
 ```Gradle
 dependencies {
-    compile 'com.github.slezadav:backgroundTasks:1.5.6'
+    compile 'com.github.slezadav:backgroundTasks:1.6.0'
 }
 ```
 
@@ -36,15 +36,17 @@ As with AsyncTask you can you can use methods like `publishProgress(Object objec
 If you want to use methods like `cancel` or `isTaskRunning`, your implementation shoul override `getTag` method of the `BaseTask`.
 
 #Task callbacks
-In order to start a task your `Activity` , `Fragment` or `View` must implement `IBgTaskCallbacks` or `IBgTaskSimpleCallbacks` interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
+In order to start a task your `Activity` , `Fragment` , `View` or `Object` must implement `IBgTaskCallbacks`, `IBgTaskSimpleCallbacks` or `IBgTaskFullCallbacks`  interface, by which the results are delivered. The `IBgTaskCallbacks` interface consists of the following methods:
 
 * `onTaskReady(BaseTask task)` - called after `onPreExecute()` of the task was completed
 * `onTaskProgressUpdate(BaseTask task,Object.. progress)` - called after the task has called `publishProgress(Progress... values)`
 * `onTaskCancelled(BaseTask task,Object result)` - called after the task has been cancelled 
 * `onTaskSuccess(BaseTask task, Object result)` - called after the task has succesfully completed (did not throw `Exception` during its process)
 * `onTaskFail(BaseTask task, Exception exception)` - called after the task has not completed succesfully (threw `Exception` during its process)
+* `Context getContext()` - used to get the Activity from an object, only part of `IBgTaskFullCallbacks`
+* `IBgTasksFullCallbacks getSelfFromActivity()` - used for the object to find itself in an Activity, only part of `IBgTaskFullCallbacks`
 
-If you use `IBgTaskSimpleCallbacks` only `onTaskSuccess(BaseTask task, Object result)` and `onTaskFail(BaseTask task, Exception exception)` are in use.
+If you use `IBgTaskSimpleCallbacks` only `onTaskSuccess(BaseTask task, Object result)` and `onTaskFail(BaseTask task, Exception exception)` are in use. While starting a task from an object which is not `Activity` , `Fragment` or `View` the `IBgTaskFullCallbacks` must be used.
 
 These callbacks will be delivered even if orientation change occurs. In case the task should deliver the callback in the exact moment when the activity is recreated, it will be delivered during `onResume()` lifecycle call.
 These callbacks are kept as `WeakReference`s and reassigned whenever the activity or fragment is recreated so the leaks should never occur.
@@ -54,12 +56,12 @@ These callbacks are kept as `WeakReference`s and reassigned whenever the activit
 Tasks are started via static methods in `BgTasks` class by calling:
 
 ```java
-BgTasks.startTask(activity/*(fragment,view)*/,task,params)
+BgTasks.startTask(activity/*(fragment,view,object)*/,task,params)
 ```
 or
 
 ```java
-BgTasks.startTask(activity/*(fragment,view)*/,task,params)
+BgTasks.startTask(activity/*(fragment,view,object)*/,task,params)
 ```
 The `tag` parameter in the call accepts a String which is then used to identify the task.
 
