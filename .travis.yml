@@ -13,4 +13,4 @@ script:
   # Sonatype bypass
   - echo "NEXUS_USERNAME=dummy" >> gradle.properties
   - echo "NEXUS_PASSWORD=dummy" >> gradle.properties
-  - ./gradlew clean assemble check
+  - ./gradlew assembleRelease
