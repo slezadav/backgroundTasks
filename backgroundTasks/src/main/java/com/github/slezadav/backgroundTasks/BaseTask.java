@@ -366,13 +366,22 @@ public abstract class BaseTask extends AsyncTask<Object, Object, Object> {
 			return false;
 		}
 		IBgTaskSimpleCallbacks clb = mCallbacks.get();
-		boolean callbacksValid = clb != null;
+		if(clb==null){
+			return false;
+		}
 		boolean detached = false;
 		if (clb instanceof Fragment) {
 			detached = ((Fragment)clb).isDetached();
+		}else if(clb instanceof Activity){
+			if(Build.VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1){
+				detached=((Activity)clb).isDestroyed()||((Activity)clb).isFinishing();
+			}else{
+				detached=((Activity)clb).isFinishing();
+			}
+
 		}
 		boolean taskFragmentValid = mEnclosingFragment.get() != null;
-		return callbacksValid && taskFragmentValid && !detached;
+		return  taskFragmentValid && !detached;
 	}
 
 	protected void startTaskInSameContext(BaseTask task,
